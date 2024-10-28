@@ -1,3 +1,4 @@
+import 'package:admin/widgets/wg_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'dart:html' as html;
@@ -11,7 +12,7 @@ class NotificationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     html.document.title = 'Naturemedix | Notifications';
     return Scaffold(
-      drawer: _buildDrawer(),
+      drawer: customDrawer(),
       body: Center(
         child: SizedBox(
           width: double.infinity,
@@ -33,92 +34,6 @@ class NotificationScreen extends StatelessWidget {
             );
           }),
         ),
-      ),
-    );
-  }
-
-  Widget _buildDrawer() {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: const BoxDecoration(),
-            child: Center(
-              child: RichText(
-                text: const TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Nature',
-                      style: TextStyle(
-                        color: Color(0xFF007E62),
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    TextSpan(
-                      text: ' Medix',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF000000),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const ListTile(
-            titleAlignment: ListTileTitleAlignment.center,
-            leading: Icon(
-              Icons.dashboard,
-              color: Colors.black,
-            ),
-            textColor: Colors.black,
-            tileColor: null,
-            title: Text('Dashboard'),
-          ),
-          const ListTile(
-            titleAlignment: ListTileTitleAlignment.center,
-            leading: Icon(
-              Icons.event_note,
-              color: Colors.black,
-            ),
-            textColor: Colors.black,
-            tileColor: null,
-            title: Text('Requests'),
-          ),
-          const ListTile(
-            titleAlignment: ListTileTitleAlignment.center,
-            leading: Icon(
-              Icons.local_florist,
-              color: Colors.black,
-            ),
-            textColor: Colors.black,
-            tileColor: null,
-            title: Text('Plants'),
-          ),
-          const ListTile(
-            titleAlignment: ListTileTitleAlignment.center,
-            leading: Icon(
-              Icons.person_search,
-              color: Colors.black,
-            ),
-            textColor: Colors.black,
-            tileColor: null,
-            title: Text('Users'),
-          ),
-          const ListTile(
-            titleAlignment: ListTileTitleAlignment.center,
-            leading: Icon(
-              Icons.settings,
-              color: Colors.black,
-            ),
-            textColor: Colors.black,
-            tileColor: null,
-            title: Text('Settigs'),
-          ),
-        ],
       ),
     );
   }

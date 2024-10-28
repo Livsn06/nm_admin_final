@@ -1,19 +1,15 @@
-import 'package:admin/screens/auth/sc_login.dart';
-import 'package:admin/screens/auth/sc_signup.dart';
-import 'package:admin/screens/dashboard/sc_dashboard.dart';
-import 'package:admin/screens/error/sc_unknown.dart';
-import 'package:admin/screens/notification/sc_notification.dart';
-import 'package:admin/screens/plants/sc_plant.dart';
-import 'package:admin/screens/requests/sc_request.dart';
-import 'package:admin/screens/settings/sc_settings.dart';
-import 'package:admin/screens/start/sc_landing.dart';
-import 'package:admin/screens/users/sc_user.dart';
+import 'package:admin/global/gb_variables.dart';
+import 'package:admin/routes/rt_routers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import 'package:get/get.dart';
+import 'utils/__dependencies.dart';
 
-import 'routes/rt_routers.dart';
-
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env');
+  initEnv();
   runApp(const MainApp());
 }
 
@@ -26,6 +22,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: RouteSetting.root.name,
       getPages: AppRoute.all,
+      initialBinding: InitBinding(),
       theme: ThemeData(
         primaryColor: Colors.black,
       ),

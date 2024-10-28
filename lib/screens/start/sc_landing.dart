@@ -1,12 +1,10 @@
+import 'package:admin/controllers/ct_landing.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'dart:html' as html;
 
-import '../../routes/rt_routers.dart';
-
-class LandingScreen extends StatelessWidget {
+class LandingScreen extends GetView<LandingController> {
   LandingScreen({super.key});
 
   var size;
@@ -17,7 +15,7 @@ class LandingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     html.document.title = 'Naturemedix';
     size = MediaQuery.of(Get.context!).size;
-    width = size.width * 0.78;
+    width = size.width * 0.80;
     height = size.height;
 
     return Scaffold(

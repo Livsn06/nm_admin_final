@@ -1,182 +1,63 @@
+import 'package:admin/widgets/wg_appbar.dart';
+import 'package:admin/widgets/wg_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'dart:html' as html;
-
-import 'package:get/get.dart';
 
 class UserScreen extends StatelessWidget {
   const UserScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    html.document.title = 'Naturemedix | Plants';
+    html.document.title = 'Naturemedix | Users';
     return Scaffold(
-      drawer: _buildDrawer(),
+      drawer: customDrawer(),
+      appBar: customAppBar(
+        context,
+        title: 'Users',
+        isPrimary: true,
+        actions: [
+          InkWell(
+            highlightColor: Colors.transparent,
+            splashColor: Colors.transparent,
+            onTap: () {},
+            child: const CircleAvatar(
+              radius: 18,
+              child: Icon(
+                Icons.notifications,
+                color: Color(0xFF007E62),
+              ),
+            ),
+          ),
+          const Gap(10),
+          Builder(
+            builder: (BuildContext context) {
+              return InkWell(
+                highlightColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                onTap: () {
+                  Scaffold.of(context).openDrawer();
+                },
+                child: const CircleAvatar(
+                  radius: 18,
+                  child: Icon(
+                    Icons.menu_sharp,
+                    color: Color(0xFF007E62),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: Center(
         child: SizedBox(
           width: double.infinity,
           height: double.infinity,
           child: LayoutBuilder(builder: (context, constraint) {
-            return Stack(
-              children: [
-                Positioned(
-                  top: 60,
-                  left: 0,
-                  child: _buildBody(constraint),
-                ),
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  child: _buildNavigation(context, constraint),
-                ),
-              ],
-            );
+            return _buildBody(constraint);
           }),
         ),
-      ),
-    );
-  }
-
-  Widget _buildDrawer() {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: const BoxDecoration(),
-            child: Center(
-              child: RichText(
-                text: const TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Nature',
-                      style: TextStyle(
-                        color: Color(0xFF007E62),
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    TextSpan(
-                      text: ' Medix',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF000000),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const ListTile(
-            titleAlignment: ListTileTitleAlignment.center,
-            leading: Icon(
-              Icons.dashboard,
-              color: Colors.black,
-            ),
-            textColor: Colors.black,
-            tileColor: null,
-            title: Text('Dashboard'),
-          ),
-          const ListTile(
-            titleAlignment: ListTileTitleAlignment.center,
-            leading: Icon(
-              Icons.event_note,
-              color: Colors.black,
-            ),
-            textColor: Colors.black,
-            tileColor: null,
-            title: Text('Requests'),
-          ),
-          const ListTile(
-            titleAlignment: ListTileTitleAlignment.center,
-            leading: Icon(
-              Icons.local_florist,
-              color: Colors.black,
-            ),
-            textColor: Colors.black,
-            tileColor: null,
-            title: Text('Plants'),
-          ),
-          const ListTile(
-            titleAlignment: ListTileTitleAlignment.center,
-            leading: Icon(
-              Icons.person_search,
-              color: Colors.white,
-            ),
-            textColor: Colors.white,
-            tileColor: Color(0xFF007E62),
-            title: Text('Users'),
-          ),
-          const ListTile(
-            titleAlignment: ListTileTitleAlignment.center,
-            leading: Icon(
-              Icons.settings,
-              color: Colors.black,
-            ),
-            textColor: Colors.black,
-            tileColor: null,
-            title: Text('Settigs'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavigation(context, constraint) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      width: constraint.maxWidth,
-      height: 60,
-      decoration: const BoxDecoration(
-        color: Color(0xFF007E62),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
-            'Users',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-            ),
-          ),
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () {},
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.notifications,
-                    color: Color(0xFF007E62),
-                  ),
-                ),
-              ),
-              const Gap(10),
-              GestureDetector(
-                onTap: () {
-                  Scaffold.of(context).openDrawer();
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.menu_sharp,
-                    color: Color(0xFF007E62),
-                  ),
-                ),
-              ),
-            ],
-          )
-        ],
       ),
     );
   }
