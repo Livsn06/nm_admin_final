@@ -83,7 +83,7 @@ class PlantScreen extends StatelessWidget {
               subtitle: 'Explore the list of plants based on your perspective.',
               isNew: true,
               onTap: () {
-                Get.toNamed(CustomRoute.path.requestsTable);
+                Get.toNamed(CustomRoute.path.plantsTable);
               },
             ),
             const Gap(4),
@@ -94,7 +94,7 @@ class PlantScreen extends StatelessWidget {
                   'Explore the list of remedies based on your perspective.',
               isNew: true,
               onTap: () {
-                Get.toNamed(CustomRoute.path.workplace);
+                Get.toNamed(CustomRoute.path.remediesTable);
               },
             ),
           ],

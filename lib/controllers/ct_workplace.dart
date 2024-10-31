@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class WorkplaceController extends GetxController
-    with _DummyDataSource, GetSingleTickerProviderStateMixin {
+    with GetSingleTickerProviderStateMixin {
   @override
   void onInit() {
     super.onInit();
     tabController = TabController(length: 3, vsync: this);
-    setWorkplaceData = dummyData();
+    // setWorkplaceData = dummyData();
   }
 
   @override
@@ -39,8 +39,8 @@ class WorkplaceController extends GetxController
   }
 }
 
-mixin _DummyDataSource {
-  List<WorkplaceModel> dummyData() {
-    return WORKPLACE_DUMMY_DATA;
-  }
-}
+// mixin _DummyDataSource {
+//   List<WorkplaceModel> dummyData() {
+//     return WORKPLACE_DUMMY_DATA;
+//   }
+// }

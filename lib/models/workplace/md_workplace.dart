@@ -1,4 +1,3 @@
-import 'package:admin/models/user/md_admin.dart';
 import 'package:admin/models/user/md_user.dart';
 
 class WorkplaceModel {
@@ -8,7 +7,7 @@ class WorkplaceModel {
   String? description;
   List<String>? images;
   UserModel? user;
-  AdminModel? admin;
+  UserModel? admin;
   String? status;
   String? createdAt;
   String? updatedAt;

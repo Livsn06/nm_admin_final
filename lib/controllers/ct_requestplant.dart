@@ -1,14 +1,7 @@
-import 'package:admin/data/dummy/dt_dummy_data.dart';
 import 'package:admin/models/request/md_request_plant.dart';
 import 'package:get/get.dart';
 
-class RequestPlantController extends GetxController with DummyDataSource {
-  @override
-  void onInit() {
-    super.onInit();
-    setRequestPlantData = dummyData();
-  }
-
+class RequestPlantController extends GetxController {
   final RxList<RequestPlantModel> _data = RxList<RequestPlantModel>([]);
   final RxList<RequestPlantModel> _pendingStatus =
       RxList<RequestPlantModel>([]);
@@ -30,8 +23,8 @@ class RequestPlantController extends GetxController with DummyDataSource {
   }
 }
 
-mixin DummyDataSource {
-  List<RequestPlantModel> dummyData() {
-    return REQUEST_DUMMY_DATA;
-  }
-}
+// mixin DummyDataSource {
+//   List<RequestPlantModel> dummyData() {
+//     return REQUEST_DUMMY_DATA;
+//   }
+// }

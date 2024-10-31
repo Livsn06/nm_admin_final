@@ -1,26 +1,26 @@
 import 'dart:developer';
 
 import 'package:admin/api/auth/api_session.dart';
-import 'package:admin/models/user/md_admin.dart';
+import 'package:admin/models/user/md_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SessionAccess {
   static SessionAccess instance = SessionAccess();
 
-  Future<void> createSession(AdminModel admin, String token) async {
+  Future<void> createSession(UserModel admin, String token) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setInt('id', admin.id!);
     prefs.setString('name', '${admin.name}');
     prefs.setString('email', '${admin.email}');
     prefs.setString('role', '${admin.role}');
-    prefs.setString('email_verified_at', '${admin.emailVerifiedAt}');
-    prefs.setString('created_at', '${admin.createdAt}');
-    prefs.setString('updated_at', '${admin.updatedAt}');
+    prefs.setString('email_verified_at', '${admin.email_verified_at}');
+    prefs.setString('created_at', '${admin.created_at}');
+    prefs.setString('updated_at', '${admin.updated_at}');
     prefs.setString('token', token);
     log('Session created Successfully', name: 'SESSION');
   }
 
-  Future<AdminModel> getSessionData() async {
+  Future<UserModel> getSessionData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int? id = prefs.getInt('id');
     String? name = prefs.getString('name');
@@ -30,14 +30,14 @@ class SessionAccess {
     String? createdAt = prefs.getString('created_at');
     String? updatedAt = prefs.getString('updated_at');
 
-    AdminModel admin = AdminModel(
+    UserModel admin = UserModel(
       id: id,
       name: name,
       email: email,
       role: role,
-      emailVerifiedAt: emailVerifiedAt,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
+      email_verified_at: emailVerifiedAt,
+      created_at: createdAt,
+      updated_at: updatedAt,
     );
     return admin;
   }

@@ -20,7 +20,7 @@ class RemedyTableScreen extends StatelessWidget {
       appBar: customAppBar(
         context,
         isPrimary: true,
-        title: 'Plants Table',
+        title: 'Remedy Table',
         actions: [
           InkWell(
             highlightColor: Colors.transparent,
@@ -64,7 +64,7 @@ class RemedyTableScreen extends StatelessWidget {
           height: constraint.maxHeight,
           child: Column(
             children: [
-              _buildSmallNavigation('Go To Remedies'),
+              _buildSmallNavigation('Go To Plant Table'),
               const Gap(20),
               _buildTable(constraint),
             ],
@@ -80,7 +80,7 @@ class RemedyTableScreen extends StatelessWidget {
       children: [
         TextButton(
           onPressed: () {
-            Get.offAndToNamed(CustomRoute.path.remediesTable);
+            Get.offAndToNamed(CustomRoute.path.plantsTable);
           },
           child: Text(
             title,
@@ -98,17 +98,57 @@ class RemedyTableScreen extends StatelessWidget {
 
   Widget _buildTable(constraint) {
     return Expanded(
-      child: SfDataGrid(
-        columnWidthMode: ColumnWidthMode.fill,
-        sortingGestureType: SortingGestureType.tap,
-        allowSorting: true,
-        headerGridLinesVisibility: GridLinesVisibility.horizontal,
-        gridLinesVisibility: GridLinesVisibility.horizontal,
-        shrinkWrapColumns: true,
-        source: PlantDataSource(
-          dataSource: plantController.getPlantData,
+      child: Obx(() {
+        return Stack(
+          children: [
+            //
+            SfDataGrid(
+              columnWidthMode: ColumnWidthMode.fill,
+              sortingGestureType: SortingGestureType.tap,
+              allowSorting: true,
+              headerGridLinesVisibility: GridLinesVisibility.horizontal,
+              gridLinesVisibility: GridLinesVisibility.horizontal,
+              shrinkWrapColumns: true,
+              source: PlantDataSource(
+                dataSource: plantController.plantData.value,
+              ),
+              columns: PlantDataSource.instance.columns,
+            ),
+
+            //
+
+            if (plantController.isLoading.value == true)
+              _buildLoading(constraint),
+            if (plantController.isError.value == true) _buildError(constraint),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildLoading(constraint) {
+    return SizedBox(
+      // color: Colors.green,
+      width: constraint.maxWidth,
+      height: constraint.maxHeight,
+      child: const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Widget _buildError(constraint) {
+    return SizedBox(
+      // color: Colors.red,
+      width: constraint.maxWidth,
+      height: constraint.maxHeight,
+      child: Center(
+        child: MaterialButton(
+          color: Colors.blue,
+          textColor: Colors.white,
+          onPressed: () {
+            plantController.loadPlantData();
+          },
+          child: const Text('Retry'),
         ),
-        columns: PlantDataSource.instance.columns,
       ),
     );
   }

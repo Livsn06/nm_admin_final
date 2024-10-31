@@ -1,7 +1,7 @@
 import 'package:admin/api/auth/api_login.dart';
 import 'package:admin/models/auth/md_login.dart';
-import 'package:admin/models/errors/md_error.dart';
-import 'package:admin/models/user/md_admin.dart';
+import 'package:admin/models/error/md_error.dart';
+import 'package:admin/models/user/md_user.dart';
 import 'package:admin/routes/rt_routers.dart';
 import 'package:admin/sessions/sn_access.dart';
 import 'package:flutter/material.dart';
@@ -263,7 +263,7 @@ mixin LoginFormController {
 
     if (response.success == true) {
       //
-      var adminUser = AdminModel.fromJson(response.data!);
+      var adminUser = UserModel.fromJson(response.data!);
 
       //
       showLoading('Session', 'Please wait...');

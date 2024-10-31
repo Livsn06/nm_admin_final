@@ -1,7 +1,4 @@
-import 'package:admin/models/plants/md_plant.dart';
-import 'package:admin/models/plants/md_plant_table.dart';
-import 'package:admin/models/request/md_request_plant.dart';
-import 'package:admin/models/request/md_request_table.dart';
+import 'package:admin/models/plant/md_plant.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
@@ -13,7 +10,7 @@ class PlantDataSource extends DataGridSource with _TableContents {
 
   static final instance = PlantDataSource();
 
-  List<PlantsModel>? dataSource;
+  List<PlantModel>? dataSource;
   List<GridColumn> get columns => customColumns();
 
   //
@@ -53,46 +50,54 @@ mixin _TableContents {
         .toList();
   }
 
-  List<DataGridRow> generateRows({required List<PlantsModel> source}) {
+  List<DataGridRow> generateRows({required List<PlantModel> source}) {
     //
     return source
         .map(
-          (PlantsModel data) => DataGridRow(cells: [
+          (PlantModel data) => DataGridRow(cells: [
             DataGridCell<int>(
               columnName: tableModel.id!,
-              value: data.id,
+              value: data.id ?? 0,
             ),
             DataGridCell<String>(
               columnName: tableModel.name!,
-              value: data.name,
+              value: data.name ?? 'N/A',
             ),
             DataGridCell<String>(
-              columnName: tableModel.scientificName!,
-              value: data.scientificName,
+              columnName: tableModel.scientific!,
+              value: data.scientific ?? 'N/A',
             ),
             DataGridCell<String>(
               columnName: tableModel.description!,
-              value: data.description,
+              value: data.description ?? 'N/A',
             ),
             DataGridCell<String>(
               columnName: tableModel.cover!,
-              value: data.cover,
-            ),
-            DataGridCell<dynamic>(
-              columnName: tableModel.admin!,
-              value: data.admin?.name,
+              value: data.cover ?? 'default image',
             ),
             DataGridCell<String>(
               columnName: tableModel.status!,
-              value: data.status,
+              value: data.status ?? 'N/A',
+            ),
+            DataGridCell<int>(
+              columnName: tableModel.likes!,
+              value: data.likes ?? 0,
+            ),
+            DataGridCell<String>(
+              columnName: tableModel.updated_by!,
+              value: data.user_update_by?.name ?? 'N/A',
+            ),
+            DataGridCell<String>(
+              columnName: tableModel.created_by!,
+              value: data.user_create_by?.name ?? 'N/A',
             ),
             DataGridCell<DateTime>(
-              columnName: tableModel.updatedAt!,
-              value: DateTime.parse(data.updatedAt!),
+              columnName: tableModel.updated_at!,
+              value: DateTime.parse(data.updated_at!),
             ),
             DataGridCell<DateTime>(
-              columnName: tableModel.createdAt!,
-              value: DateTime.parse(data.createdAt!),
+              columnName: tableModel.created_at!,
+              value: DateTime.parse(data.created_at!),
             ),
           ]),
         )
@@ -105,8 +110,8 @@ mixin _TableContents {
     //   return Image.network(value);
     // }
 
-    if (tableModel.updatedAt == columnName ||
-        tableModel.createdAt == columnName) {
+    if (tableModel.updated_at == columnName ||
+        tableModel.created_at == columnName) {
       return Text(formatDate(value),
           textWidthBasis: TextWidthBasis.longestLine);
     }
@@ -117,7 +122,9 @@ mixin _TableContents {
   bool hideColumn(String columnName) {
     if (tableModel.description == columnName ||
         tableModel.id == columnName ||
-        tableModel.updatedAt == columnName) {
+        tableModel.updated_at == columnName ||
+        tableModel.created_by == columnName ||
+        tableModel.created_by == columnName) {
       return false;
     }
     return true;
@@ -125,8 +132,7 @@ mixin _TableContents {
 
   //FILTERS
   bool _disableSort(String columnName) {
-    if (tableModel.description == columnName ||
-        tableModel.image == columnName) {
+    if (tableModel.status == columnName || tableModel.cover == columnName) {
       return false;
     }
     return true;

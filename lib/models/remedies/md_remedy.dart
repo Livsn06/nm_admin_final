@@ -3,13 +3,12 @@ import 'package:admin/models/remedies/md_step.dart';
 import 'package:admin/models/remedies/md_usage.dart';
 import 'package:admin/models/remedies/md_video.dart';
 
-import '../plants/md_plant.dart';
+import '../plant/md_plant.dart';
 
 class RemedyModel {
   int? id;
   String? name;
   String? type;
-  PlantsModel? plant;
   String? treatment;
   String? description;
   RatingModel? rating;
@@ -21,7 +20,6 @@ class RemedyModel {
       {this.id,
       this.name,
       this.type,
-      this.plant,
       this.treatment,
       this.description,
       this.rating,
@@ -33,7 +31,6 @@ class RemedyModel {
     id = json['id'];
     name = json['name'];
     type = json['type'];
-    plant = json['plant'] != null ? PlantsModel.fromJson(json['plant']) : null;
     treatment = json['treatment'];
     description = json['description'];
     rating =
@@ -48,9 +45,6 @@ class RemedyModel {
     data['id'] = id;
     data['name'] = name;
     data['type'] = type;
-    if (plant != null) {
-      data['plantID'] = plant!.id;
-    }
     data['treatment'] = treatment;
     data['description'] = description;
     return data;
