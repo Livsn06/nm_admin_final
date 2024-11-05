@@ -13,6 +13,8 @@ class SessionAccess {
     prefs.setString('name', '${admin.name}');
     prefs.setString('email', '${admin.email}');
     prefs.setString('role', '${admin.role}');
+    prefs.setString('status', admin.status ?? 'In Active');
+    prefs.setString('avatar', '${admin.avatar}');
     prefs.setString('email_verified_at', '${admin.email_verified_at}');
     prefs.setString('created_at', '${admin.created_at}');
     prefs.setString('updated_at', '${admin.updated_at}');
@@ -86,5 +88,19 @@ class SessionAccess {
     prefs.remove('created_at');
     prefs.remove('updated_at');
     prefs.remove('token');
+  }
+
+  Future<void> savedEmail(UserModel admin) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt('id', admin.id!);
+    prefs.setString('name', '${admin.name}');
+    prefs.setString('email', '${admin.email}');
+    prefs.setString('role', '${admin.role}');
+    prefs.setString('status', admin.status ?? 'In Active');
+    prefs.setString('avatar', '${admin.avatar}');
+    prefs.setString('email_verified_at', '${admin.email_verified_at}');
+    prefs.setString('created_at', '${admin.created_at}');
+    prefs.setString('updated_at', '${admin.updated_at}');
+    log('Email saved Successfully', name: 'SESSION');
   }
 }

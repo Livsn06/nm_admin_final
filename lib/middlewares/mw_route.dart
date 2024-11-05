@@ -16,16 +16,20 @@ class RouteMiddleware extends GetMiddleware {
         route == CustomRoute.path.landing ||
         route == CustomRoute.path.signup ||
         route == CustomRoute.path.login ||
+        route == CustomRoute.path.searchEmail ||
+        route == CustomRoute.path.resetPassword ||
         route == CustomRoute.path.dashboard ||
         route == CustomRoute.path.plants ||
         route == CustomRoute.path.plantsTable ||
         route == CustomRoute.path.remediesTable ||
+        route == CustomRoute.path.remediesCreate ||
         route == CustomRoute.path.requests ||
         route == CustomRoute.path.requestsTable ||
         route == CustomRoute.path.workplace ||
         route == CustomRoute.path.users ||
         route == CustomRoute.path.notification ||
-        route == CustomRoute.path.settings) {
+        route == CustomRoute.path.settings ||
+        route == CustomRoute.path.plantsCreate) {
       return true;
     } else {
       return false;

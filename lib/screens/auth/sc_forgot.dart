@@ -1,3 +1,4 @@
+import 'package:admin/api/auth/api_forgot.dart';
 import 'package:admin/api/auth/api_login.dart';
 import 'package:admin/models/auth/md_login.dart';
 import 'package:admin/models/error/md_error.dart';
@@ -9,17 +10,18 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'dart:html' as html;
 
-class LoginScreen extends StatefulWidget with LoginFormController {
-  LoginScreen({super.key});
+class ForgotPasswordScreen extends StatefulWidget
+    with ForgotPasswordFormController {
+  ForgotPasswordScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
-    html.document.title = 'Naturemedix | Login';
+    html.document.title = 'Naturemedix | Forgot';
 
     //
     return Scaffold(
@@ -74,25 +76,10 @@ class _LoginScreenState extends State<LoginScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text(
-            'LOGIN',
+            'FIND ACCOUNT',
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w900,
-            ),
-          ),
-          const Gap(5),
-          const Text(
-            'Sign in to your account',
-            style: TextStyle(
-              fontSize: 14,
-            ),
-          ),
-          const Gap(8),
-          const SizedBox(
-            width: 200,
-            child: Divider(
-              thickness: 1,
-              color: Colors.grey,
             ),
           ),
           const Gap(60),
@@ -100,34 +87,20 @@ class _LoginScreenState extends State<LoginScreen> {
             key: widget.formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
+                const Text(
+                  'Please enter your email or mobile number to search for \nyour account.',
+                  style: TextStyle(
+                    fontSize: 15,
+                  ),
+                ),
+                const Gap(18),
                 TextFormField(
                   controller: widget.emailController,
                   decoration: _buildFormDecoration('Email Address'),
                   validator: widget.validateEmail,
-                ),
-                const Gap(12),
-                TextFormField(
-                  controller: widget.passwordController,
-                  decoration:
-                      _buildFormDecoration('Password', isPassword: true),
-                  obscureText: !widget.showPassword,
-                  validator: widget.validatePassword,
-                ),
-                const Gap(12),
-                GestureDetector(
-                  onTap: () {
-                    Get.toNamed(CustomRoute.path.searchEmail);
-                  },
-                  child: const Text(
-                    'Forgot Password?',
-                    style: TextStyle(
-                      color: Color(0xFF007E62),
-                      fontSize: 14,
-                    ),
-                  ),
                 ),
                 const Gap(20),
                 MaterialButton(
@@ -136,10 +109,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                   color: const Color(0xFF007E62),
                   onPressed: () async {
-                    await widget.loginCredentials();
+                    await widget.findCredentials();
                   },
                   child: const Text(
-                    'Log in',
+                    'Search',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -154,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                'Don\'t have an account?',
+                'Already remembered account?',
                 style: TextStyle(
                   fontSize: 14,
                 ),
@@ -162,10 +135,10 @@ class _LoginScreenState extends State<LoginScreen> {
               const Gap(5),
               GestureDetector(
                 onTap: () {
-                  widget.gotoSignupScreen();
+                  widget.gotoLoginScreen();
                 },
                 child: const Text(
-                  'Sign Up',
+                  'Log in',
                   style: TextStyle(
                     color: Color(0xFF007E62),
                     fontSize: 14,
@@ -231,24 +204,22 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-mixin LoginFormController {
+mixin ForgotPasswordFormController {
   final formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
-  final passwordController = TextEditingController();
   ErrorModel? error;
   bool showPassword = false;
-  Future<void> loginCredentials() async {
+  Future<void> findCredentials() async {
     if (!formKey.currentState!.validate()) {
       return;
     }
 
     var credentials = LoginModel(
       email: emailController.text,
-      password: passwordController.text,
     );
 
-    showLoading('Authetication', 'Please wait...');
-    var response = await LoginApi.auth.login(credentials);
+    showLoading('Searching', 'Please wait...');
+    var response = await ForgotPasswordApi.auth.searchEmail(credentials);
     Get.close(1);
 
     if (response == null) {
@@ -266,17 +237,8 @@ mixin LoginFormController {
     if (response.success == true) {
       //
       var adminUser = UserModel.fromJson(response.data!);
-
-      //
-      showLoading('Session', 'Please wait...');
-      SessionAccess.instance
-          .createSession(adminUser, response.token!)
-          .then((_) async {
-        Get.close(1);
-        showSuccessDialog('Success', 'Login successfully!');
-        resetForm();
-        html.window.location.reload();
-      });
+      SessionAccess.instance.savedEmail(adminUser);
+      showSuccessDialog('Found', 'Email found successfully!');
 
       //
     }
@@ -289,7 +251,6 @@ mixin LoginFormController {
 
   void resetForm() {
     emailController.clear();
-    passwordController.clear();
   }
 
   // validations
@@ -321,8 +282,8 @@ mixin LoginFormController {
     Get.offAllNamed(CustomRoute.path.root);
   }
 
-  void gotoSignupScreen() {
-    Get.offNamed(CustomRoute.path.signup, preventDuplicates: true);
+  void gotoLoginScreen() {
+    Get.offNamed(CustomRoute.path.login, preventDuplicates: true);
   }
 
   //Modals
@@ -369,6 +330,23 @@ mixin LoginFormController {
   }
 
   void showSuccessDialog(title, message) {
+    Get.defaultDialog(
+      title: title,
+      barrierDismissible: false,
+      middleText: message,
+      middleTextStyle: const TextStyle(color: Colors.black),
+      textConfirm: 'OK',
+      confirmTextColor: Colors.white,
+      buttonColor: Colors.green,
+      onConfirm: () {
+        resetForm();
+        Get.close(1);
+        Get.toNamed(CustomRoute.path.resetPassword);
+      },
+    );
+  }
+
+  void showSnackbarDialog(title, message) {
     Get.snackbar(
       title,
       message,

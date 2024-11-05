@@ -1,16 +1,16 @@
-import 'package:admin/data/dummy/dt_dummy_data.dart';
+import 'package:admin/api/workplace/api_workplace.dart';
 import 'package:admin/models/workplace/md_workplace.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 
 class WorkplaceController extends GetxController
-    with GetSingleTickerProviderStateMixin {
+    with DataSourceApi, GetSingleTickerProviderStateMixin {
   @override
   void onInit() {
     super.onInit();
     tabController = TabController(length: 3, vsync: this);
-    // setWorkplaceData = dummyData();
+    loadAllData();
   }
 
   @override
@@ -20,27 +20,44 @@ class WorkplaceController extends GetxController
   }
 
   late final TabController tabController;
-  final RxList<WorkplaceModel> _data = RxList<WorkplaceModel>([]);
-  final RxList<WorkplaceModel> _inprogressStatus = RxList<WorkplaceModel>([]);
-
-  //SETTERS
-  List<WorkplaceModel> get getWorkplaceData => _data.value;
-
-  set setWorkplaceData(List<WorkplaceModel> value) {
-    _data.value = value;
-  }
+  final RxList<WorkplaceModel> workplaceData = RxList<WorkplaceModel>([]);
+  List<WorkplaceModel> get getInprogressStatus => filterByStatus("In Progress");
+  List<WorkplaceModel> get getCompletedStatus => filterByStatus("Completed");
 
   //FUNCTIONS
   List<WorkplaceModel> filterByStatus(String status) {
-    return _data
+    return workplaceData
         .where((workplace) =>
             workplace.status!.toLowerCase() == status.toLowerCase())
         .toList();
   }
+
+  void loadAllData() async {
+    workplaceData.value = await workplaceApiData() ?? [];
+  }
 }
 
-// mixin _DummyDataSource {
-//   List<WorkplaceModel> dummyData() {
-//     return WORKPLACE_DUMMY_DATA;
-//   }
-// }
+mixin DataSourceApi {
+  RxBool isLoading = false.obs;
+  RxBool isError = false.obs;
+  Future<List<WorkplaceModel>?> workplaceApiData() async {
+    stateReset();
+
+    isLoading.value = true;
+    var value = await ApiWorkplace.fetchAllRequests();
+
+    if (value == null) {
+      isLoading.value = false;
+      isError.value = true;
+    } else {
+      isLoading.value = false;
+      isError.value = false;
+    }
+    return value;
+  }
+
+  void stateReset() {
+    isLoading.value = false;
+    isError.value = false;
+  }
+}

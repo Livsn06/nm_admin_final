@@ -24,12 +24,13 @@ class SessionApi {
         headers: headers,
       );
 
-      log('Server session status: ${response.statusCode}', name: 'API');
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        log('Session confirmed', name: 'API SESSION');
         final data = jsonDecode(response.body);
         return SessionModel.fromJson(data, success: true);
       }
 
+      log('Session Declined', name: 'API SESSION');
       if (response.statusCode == 405) {
         final data = jsonDecode(response.body);
         return SessionModel.fromJson(data, success: false);

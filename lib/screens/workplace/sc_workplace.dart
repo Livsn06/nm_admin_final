@@ -122,8 +122,20 @@ class WorkplaceScreen extends StatelessWidget {
 
   Widget _buildSmallNavigation(String title) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        TextField(
+          controller: TextEditingController(),
+          style: const TextStyle(color: Colors.black, fontSize: 16),
+          decoration: InputDecoration(
+            labelText: 'Search',
+            prefixIcon: const Icon(Icons.search),
+            constraints: const BoxConstraints(maxWidth: 240, maxHeight: 40),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        ),
         TextButton(
           onPressed: () {
             Get.offAndToNamed(CustomRoute.path.requestsTable);
@@ -150,7 +162,7 @@ class TabBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      var filteredPlants = controller.getWorkplaceData
+      var filteredPlants = controller.workplaceData.value
           .where(
               (plant) => statusFilter == 'All' || plant.status == statusFilter)
           .toList();
@@ -173,8 +185,8 @@ class TabBody extends StatelessWidget {
           return PlantCard(
             plantname: plant.plantName!,
             status: plant.status!,
-            date: plant.updatedAt!,
-            plantimage: 'assets/sample_image/ast_sample1.png',
+            date: plant.updated_at!,
+            plantimage: '${plant.images?[0].path}',
             ontap: () {},
           );
         },
@@ -251,9 +263,10 @@ class PlantCard extends StatelessWidget {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: SizedBox(
+      child: Container(
+        padding: const EdgeInsets.all(10),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // New Tag
             Container(
@@ -275,11 +288,8 @@ class PlantCard extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    plantimage, // Replace with your actual image
+                  image: DecorationImage(
+                    image: NetworkImage(plantimage),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -323,7 +333,7 @@ class PlantCard extends StatelessWidget {
       case 'Completed':
         return const Color(0xFF00A308);
       default:
-        return Colors.grey;
+        return const Color(0xFFD8D8D8);
     }
   }
 }

@@ -111,84 +111,28 @@ class PlantModel {
     scientific = json['scientific'];
     description = json['description'];
     status = json['status'];
-    cover = json['cover'];
+    cover = json['cover'] ?? 'assets/placeholder/plant_image1.jpg';
     likes = json['likes'];
-    images = ApiImageModel.listFromJson(json['images']);
-    user_create_by = UserModel.fromJson(json['user_create_by']);
-    user_update_by = UserModel.fromJson(json['user_update_by']);
+    images = json['images'] != null
+        ? ApiImageModel.listFromJson(json['images'])
+        : null;
+    user_create_by = json['user_create_by'] != null
+        ? UserModel.fromJson(json['user_create_by'])
+        : null;
+    user_update_by = json['user_update_by'] != null
+        ? UserModel.fromJson(json['user_update_by'])
+        : null;
     //
     created_at = json['created_at'];
     updated_at = json['updated_at'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['name'] = name;
-    data['scientific'] = scientific;
-    data['description'] = description;
-    data['status'] = status;
-    data['cover'] = cover;
-    data['likes'] = likes;
-    data['updated_by'] = user_update_by?.id!;
-
+  Map<String, String> toJson() {
+    final Map<String, String> data = <String, String>{};
+    data['name'] = name.toString();
+    data['scientific'] = scientific.toString();
+    data['description'] = description.toString();
+    data['created_by'] = user_create_by!.id.toString();
     return data;
-  }
-}
-
-///
-///
-///
-///
-///
-
-class PlantsTableModel {
-  String? id;
-  String? name;
-  String? scientific;
-  String? description;
-  String? status;
-  String? cover;
-  String? likes;
-  String? created_at;
-  String? updated_at;
-
-  // admins
-  String? updated_by;
-  String? created_by;
-
-  PlantsTableModel({
-    this.id = 'ID',
-    this.name = 'Name',
-    this.scientific = 'Scientific Name',
-    this.description = 'Description',
-    this.cover = 'Pictures',
-    this.status = 'Status',
-    this.likes = 'Likes',
-    //
-    this.updated_by = 'Updated By',
-    this.created_by = 'Created By',
-    //
-    this.updated_at = 'Last Updated',
-    this.created_at = 'Created At',
-  });
-
-  // List of plants from JSON
-  //to list
-
-  List<String> toColumns() {
-    return [
-      id!,
-      name!,
-      scientific!,
-      description!,
-      cover!,
-      status!,
-      likes!,
-      updated_by!,
-      created_by!,
-      updated_at!,
-      created_at!,
-    ];
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:admin/global/gb_variables.dart';
 import 'package:admin/models/auth/md_login.dart';
@@ -28,6 +29,7 @@ class LoginApi {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        log('Login successful', name: 'API LOGIN');
         return ResponseModel.fromJson(data, success: true);
       }
 

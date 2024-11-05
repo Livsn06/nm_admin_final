@@ -1,44 +1,74 @@
+import 'package:admin/controllers/ct_plant.dart';
 import 'package:admin/controllers/ct_requestplant.dart';
+import 'package:admin/controllers/ct_user.dart';
 import 'package:admin/controllers/ct_workplace.dart';
-import 'package:admin/data/table/dt_workplace.dart';
+import 'package:admin/routes/rt_routers.dart';
+import 'package:admin/widgets/wg_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'dart:html' as html;
 
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
-
 import '../../widgets/wg_drawer.dart';
 
 class DashboardScreen extends StatelessWidget {
   DashboardScreen({super.key});
+  final plantController = Get.put(PlantController());
   final workplaceController = Get.put(WorkplaceController());
   final requestplantController = Get.put(RequestPlantController());
+  final userController = Get.put(UserController());
+
   //
   @override
   Widget build(BuildContext context) {
     html.document.title = 'Naturemedix | Dashboard';
     return Scaffold(
       drawer: customDrawer(),
+      appBar: customAppBar(
+        context,
+        title: 'Dashboard',
+        isPrimary: true,
+        actions: [
+          InkWell(
+            highlightColor: Colors.transparent,
+            splashColor: Colors.transparent,
+            onTap: () {},
+            child: const CircleAvatar(
+              radius: 18,
+              child: Icon(
+                Icons.notifications,
+                color: Color(0xFF007E62),
+              ),
+            ),
+          ),
+          const Gap(10),
+          Builder(
+            builder: (BuildContext context) {
+              return InkWell(
+                highlightColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                onTap: () {
+                  Scaffold.of(context).openDrawer();
+                },
+                child: const CircleAvatar(
+                  radius: 18,
+                  child: Icon(
+                    Icons.menu_sharp,
+                    color: Color(0xFF007E62),
+                  ),
+                ),
+              );
+            },
+          ),
+          const Gap(20),
+        ],
+      ),
       body: Center(
         child: SizedBox(
           width: double.infinity,
           height: double.infinity,
           child: LayoutBuilder(builder: (context, constraint) {
-            return Stack(
-              children: [
-                Positioned(
-                  top: 60,
-                  left: 0,
-                  child: _buildBody(constraint),
-                ),
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  child: _buildNavigation(context, constraint),
-                ),
-              ],
-            );
+            return _buildBody(constraint);
           }),
         ),
       ),
@@ -153,7 +183,7 @@ class DashboardScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTitle('Data Analysis'),
+          Expanded(child: _buildTitle('Data Analysis')),
           const Gap(20),
           Wrap(
             spacing: constraint.maxWidth * 0.0078,
@@ -168,9 +198,16 @@ class DashboardScreen extends StatelessWidget {
           const Gap(40),
 
           //
-          _buildTitle('Current Working'),
+          Expanded(
+              child: _buildTitle(
+            'Currently Working',
+            isView: true,
+            viewAll: () {
+              Get.toNamed(CustomRoute.path.workplace);
+            },
+          )),
           const Gap(20),
-          _buildWorkplaceTable(constraint)
+          _buildDataView(constraint)
         ],
       ),
     );
@@ -185,28 +222,38 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWorkplaceTable(constraint) {
+  Widget _buildDataView(constraint) {
     return Container(
       color: const Color.fromARGB(255, 246, 246, 246),
       width: constraint.maxWidth,
       height: constraint.maxHeight - 450,
       alignment: Alignment.center,
-      child: SfDataGrid(
-        sortingGestureType: SortingGestureType.tap,
-        allowSorting: true,
-        columnWidthMode: ColumnWidthMode.auto,
-        headerGridLinesVisibility: GridLinesVisibility.horizontal,
-        gridLinesVisibility: GridLinesVisibility.horizontal,
-        loadMoreViewBuilder: (context, loadMoreRows) {
-          print('loadmore');
-          return null;
-        },
-        shrinkWrapColumns: true,
-        source: WorkplaceDataSource(
-          workplaceData: workplaceController.filterByStatus('In progress'),
-        ),
-        columns: WorkplaceDataSource.instance.columns,
-      ),
+      child: Obx(() {
+        return ListView.builder(
+          itemCount: workplaceController.getInprogressStatus.length,
+          itemBuilder: (context, index) {
+            var workplace = workplaceController.getInprogressStatus[index];
+            return Card(
+                color: Colors.white,
+                child: ListTile(
+                  leading: Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: NetworkImage(
+                          '${workplace.images?[0].path}',
+                        ),
+                      ),
+                    ),
+                  ),
+                  title: Text('${workplace.plantName}'),
+                  subtitle: Text('${workplace.scientific_name}'),
+                  trailing: Text('${workplace.updated_at}'),
+                ));
+          },
+        );
+      }),
     );
   }
 
@@ -233,56 +280,81 @@ class DashboardScreen extends StatelessWidget {
           ],
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: _buildTitle('New Requests')),
+            Expanded(
+                child: _buildTitle(
+              'New Requests',
+              isView: true,
+              viewAll: () {
+                Get.toNamed(CustomRoute.path.requestsTable);
+              },
+            )),
             Expanded(
               flex: 14,
               child: Container(
                 color: const Color.fromARGB(0, 0, 0, 0),
-                child: ListView.builder(
-                  itemCount: requestplantController.getPendingStatus.length,
-                  itemBuilder: (context, index) {
-                    var data = requestplantController.getPendingStatus[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 0.02),
-                      child: Card(
-                        color: const Color.fromARGB(255, 255, 255, 255),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          side: const BorderSide(
-                            color: Color.fromARGB(255, 210, 210, 210),
-                          ),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.transparent,
-                            radius: 20,
-                            child: Image.asset(
-                              'assets/sys_image/ast_landing_hero.png',
+                child: Obx(() {
+                  return ListView.builder(
+                    itemCount: requestplantController.getPendingStatus.length,
+                    itemBuilder: (context, index) {
+                      var data = requestplantController.getPendingStatus[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 0.02),
+                        child: Card(
+                          color: const Color.fromARGB(255, 255, 255, 255),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              color: Color.fromARGB(255, 210, 210, 210),
                             ),
+                            borderRadius: BorderRadius.circular(5),
                           ),
-                          title: Text('${data.plantName}'),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.transparent,
+                              radius: 20,
+                              child: Image.network(
+                                '${data.images?[0].path}',
+                              ),
+                            ),
+                            title: Text('${data.plantName}'),
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  );
+                }),
               ),
             ),
           ],
         ));
   }
 
-  Widget _buildTitle(String title) {
-    return Text(
-      title.toUpperCase(),
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Colors.black,
-      ),
+  Widget _buildTitle(String title, {bool isView = false, Function()? viewAll}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title.toUpperCase(),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+        if (isView)
+          TextButton(
+            onPressed: viewAll,
+            child: const Text(
+              'View All',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF007E62),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -302,30 +374,36 @@ class DashboardScreen extends StatelessWidget {
       height: 140,
       child: LayoutBuilder(
         builder: (context, constraint2) {
-          return Stack(
-            children: [
-              Align(
-                alignment: Alignment.topLeft,
-                child: _buildTitleCard(key: 1, constraint2, 'Plants'),
-              ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: _buildBarGraph(key: 1, constraint2),
-              ),
-              Align(
-                alignment: Alignment.bottomLeft,
-                child: _buildData(data: '1,400', 'Total Plants'),
-              ),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: _buildLogo(key: 1, Icons.local_florist),
-              ),
-              Align(
-                alignment: Alignment.topRight,
-                child: _buildActive(data: '1,250', 'Active'),
-              )
-            ],
-          );
+          return Obx(() {
+            var totalPlant = plantController.plantData.value.length.toDouble();
+            var totalActive =
+                plantController.plantActive.value.length.toDouble();
+            return Stack(
+              children: [
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: _buildTitleCard(key: 1, constraint2, 'Plants'),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: _buildBarGraph(
+                      key: 1, constraint2, total: totalPlant, min: totalActive),
+                ),
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: _buildData(data: '$totalPlant', 'Total Plants'),
+                ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: _buildLogo(key: 1, Icons.local_florist),
+                ),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: _buildActive(data: '$totalActive', 'Active'),
+                ),
+              ],
+            );
+          });
         },
       ),
     );
@@ -347,30 +425,37 @@ class DashboardScreen extends StatelessWidget {
       height: 140,
       child: LayoutBuilder(
         builder: (context, constraint2) {
-          return Stack(
-            children: [
-              Align(
-                alignment: Alignment.topLeft,
-                child: _buildTitleCard(key: 2, constraint2, 'Users'),
-              ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: _buildBarGraph(key: 2, constraint2),
-              ),
-              Align(
-                alignment: Alignment.bottomLeft,
-                child: _buildData(data: '2,350', 'Total Users'),
-              ),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: _buildLogo(key: 2, Icons.person_pin),
-              ),
-              Align(
-                alignment: Alignment.topRight,
-                child: _buildActive(data: '2,100', 'Active'),
-              )
-            ],
-          );
+          return Obx(() {
+            var totalUser =
+                userController.usersRoleUser.value.length.toDouble();
+            var totalActive =
+                userController.usersRoleUserActive.length.toDouble();
+            return Stack(
+              children: [
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: _buildTitleCard(key: 2, constraint2, 'Users'),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: _buildBarGraph(
+                      key: 2, constraint2, total: totalUser, min: totalActive),
+                ),
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: _buildData(data: '$totalUser', 'Total Users'),
+                ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: _buildLogo(key: 2, Icons.person_pin),
+                ),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: _buildActive(data: '$totalActive', 'Active'),
+                )
+              ],
+            );
+          });
         },
       ),
     );
@@ -392,30 +477,43 @@ class DashboardScreen extends StatelessWidget {
       height: 140,
       child: LayoutBuilder(
         builder: (context, constraint2) {
-          return Stack(
-            children: [
-              Align(
-                alignment: Alignment.topLeft,
-                child: _buildTitleCard(key: 3, constraint2, 'Workplace'),
-              ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: _buildBarGraph(key: 3, constraint2),
-              ),
-              Align(
-                alignment: Alignment.bottomLeft,
-                child: _buildData(data: '1,400', 'Total Uploads'),
-              ),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: _buildLogo(key: 3, Icons.wysiwyg_outlined),
-              ),
-              Align(
-                alignment: Alignment.topRight,
-                child: _buildActive(data: '10', 'Inprogress'),
-              )
-            ],
-          );
+          return Obx(() {
+            var totalWorkplace =
+                workplaceController.workplaceData.value.length.toDouble();
+            var totalInprogress =
+                workplaceController.getInprogressStatus.length.toDouble();
+            var totalCompleted =
+                workplaceController.getCompletedStatus.length.toDouble();
+            return Stack(
+              children: [
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: _buildTitleCard(key: 3, constraint2, 'Workplace'),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: _buildBarGraph(
+                    constraint2,
+                    key: 3,
+                    total: totalWorkplace,
+                    min: totalCompleted,
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: _buildData(data: '$totalWorkplace', 'Total Accepted'),
+                ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: _buildLogo(key: 3, Icons.wysiwyg_outlined),
+                ),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: _buildActive(data: '$totalInprogress', 'Inprogress'),
+                )
+              ],
+            );
+          });
         },
       ),
     );
@@ -476,9 +574,16 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBarGraph(constraint, {required int key}) {
+  Widget _buildBarGraph(
+    constraint, {
+    required int key,
+    double min = 0.0,
+    double total = 0.0,
+  }) {
+    double width = 200;
+    var valueWith = _graphCalculate(min, total, width);
     return Container(
-      width: 200,
+      width: width,
       height: 10,
       decoration: BoxDecoration(
         color: Colors.grey,
@@ -487,7 +592,7 @@ class DashboardScreen extends StatelessWidget {
       child: Stack(
         children: [
           Container(
-            width: 120,
+            width: valueWith,
             height: 10,
             decoration: BoxDecoration(
               color: key == 1
@@ -501,6 +606,16 @@ class DashboardScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  double _graphCalculate(double min, double total, double width) {
+    if (min == 0 || total == 0) {
+      return 0;
+    }
+    double value = (min / total);
+    value = width * value;
+
+    return value;
   }
 
   Widget _buildTitleCard(constraint, String title, {required int key}) {

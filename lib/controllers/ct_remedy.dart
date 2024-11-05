@@ -1,48 +1,43 @@
+import 'package:admin/api/remedy/api_remedy.dart';
 import 'package:admin/models/plant/md_plant.dart';
+import 'package:admin/models/remedies/md_remedy.dart';
 import 'package:get/get.dart';
 
 import '../api/plant/api_plant.dart';
 
-class PlantController extends GetxController with DataSourceApi {
+class RemedyController extends GetxController with DataSourceApi {
   @override
   void onInit() {
     super.onInit();
-    loadPlantData();
+    loadAllData();
   }
 
-  final RxList<PlantModel> plantData = RxList<PlantModel>([]);
-  final RxList<PlantModel> plantActive = RxList<PlantModel>([]);
+  final RxList<RemedyModel> remedyData = RxList<RemedyModel>([]);
+  final RxList<RemedyModel> remedyActiveData = RxList<RemedyModel>([]);
 
   //FUNCTIONS
-  List<PlantModel> filterByStatus(String status) {
-    return plantData.value
-        .where((plant) => plant.status!.toLowerCase() == status.toLowerCase())
+  List<RemedyModel> filterByStatus(String status) {
+    return remedyData.value
+        .where((remedy) => remedy.status!.toLowerCase() == status.toLowerCase())
         .toList();
   }
 
-  void loadPlantData() async {
-    plantData.value = await plantApiData() ?? [];
-
-    plantActive.value = filterByStatus('Active');
+  void loadAllData() async {
+    remedyData.value = await plantApiData() ?? [];
+    remedyActiveData.value = filterByStatus('Active');
   }
 }
-
-// mixin DummyDataSource {
-//   List<PlantModel> dummyData() {
-//     return PLANTS_DUMMY_DATA;
-//   }
-// }
 
 mixin DataSourceApi {
   RxBool isLoading = false.obs;
   RxBool isError = false.obs;
 
-  Future<List<PlantModel>?> plantApiData() async {
+  Future<List<RemedyModel>?> plantApiData() async {
     stateReset();
 
     //
     isLoading.value = true;
-    var value = await ApiPlant.fetchAllPlants();
+    var value = await ApiRemedy.fetchAllRemedy();
 
     if (value == null) {
       isLoading.value = false;

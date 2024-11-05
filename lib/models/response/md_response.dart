@@ -26,4 +26,13 @@ class ResponseModel {
         data: json["data"] == null ? null : json["data"][0],
         errors: json["errors"],
       );
+
+  factory ResponseModel.fromEmailOnlyJson(Map<String, dynamic> json,
+          {required bool success}) =>
+      ResponseModel(
+        success: success,
+        api_success: json["success"],
+        message: json["message"],
+        data: json["data"],
+      );
 }

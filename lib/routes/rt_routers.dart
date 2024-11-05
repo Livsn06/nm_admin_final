@@ -1,6 +1,10 @@
 import 'package:admin/middlewares/mw_route.dart';
+import 'package:admin/screens/auth/sc_forgot.dart';
+import 'package:admin/screens/auth/sc_reset.dart';
 import 'package:admin/screens/error/sc_unknown.dart';
+import 'package:admin/screens/plants/sc_plant_create.dart';
 import 'package:admin/screens/plants/sc_plant_table.dart';
+import 'package:admin/screens/remedies/sc_remedy_create.dart';
 import 'package:admin/screens/remedies/sc_remedy_table.dart';
 import 'package:admin/screens/requests/sc_request_table.dart';
 import 'package:admin/screens/settings/sc_settings.dart';
@@ -23,11 +27,15 @@ enum RouteSetting {
   root,
   landing,
   signup,
+  resetPassword,
+  searchEmail,
   login,
   dashboard,
   plants,
   plantTable,
+  plantCreate,
   remedyTable,
+  remedyCreate,
   requests,
   requestTable,
   workspace,
@@ -43,14 +51,22 @@ enum RouteSetting {
         return '/signup';
       case login:
         return '/login';
+      case resetPassword:
+        return '/resetPassword';
+      case searchEmail:
+        return '/searchEmail';
       case dashboard:
         return '/dashboard';
       case plants:
         return '/plants';
       case plantTable:
         return '/plantTable';
+      case plantCreate:
+        return '/plantCreate';
       case remedyTable:
         return '/remedyTable';
+      case remedyCreate:
+        return '/remedyCreate';
       case requests:
         return '/requests';
       case requestTable:
@@ -75,11 +91,15 @@ class CustomRoute {
   String get root => '/';
   String get landing => '/landing';
   String get login => '/login';
+  String get searchEmail => '/login/searchEmail';
+  String get resetPassword => '/login/searchEmail/resetPassword';
   String get signup => '/signup';
   String get dashboard => '/dashboard';
   String get plants => '/dashboard/plants';
   String get plantsTable => '/dashboard/plants/plantTable';
+  String get plantsCreate => '/dashboard/plants/plantTable/plantCreate';
   String get remediesTable => '/dashboard/plants/remedyTable';
+  String get remediesCreate => '/dashboard/plants/remedyTable/remedyCreate';
   String get requests => '/dashboard/requests';
   String get requestsTable => '/dashboard/requests/requestTable';
   String get workplace => '/dashboard/requests/workplace';
@@ -106,9 +126,19 @@ class AppRoute {
           page: () => SignupScreen(),
         ),
         GetPage(
-          name: RouteSetting.login.name,
-          page: () => LoginScreen(),
-        ),
+            name: RouteSetting.login.name,
+            page: () => LoginScreen(),
+            children: [
+              GetPage(
+                  name: RouteSetting.searchEmail.name,
+                  page: () => ForgotPasswordScreen(),
+                  children: [
+                    GetPage(
+                      name: RouteSetting.resetPassword.name,
+                      page: () => ResetPasswordScreen(),
+                    ),
+                  ]),
+            ]),
       ],
     ),
 
@@ -133,12 +163,25 @@ class AppRoute {
                 name: RouteSetting.plantTable.name,
                 page: () => PlantTableScreen(),
                 preventDuplicates: true,
+                children: [
+                  GetPage(
+                    name: RouteSetting.plantCreate.name,
+                    page: () => PlantCreateScreen(),
+                    preventDuplicates: true,
+                  ),
+                ],
               ),
               GetPage(
-                name: RouteSetting.remedyTable.name,
-                page: () => RemedyTableScreen(),
-                preventDuplicates: true,
-              ),
+                  name: RouteSetting.remedyTable.name,
+                  page: () => RemedyTableScreen(),
+                  preventDuplicates: true,
+                  children: [
+                    GetPage(
+                      name: RouteSetting.remedyCreate.name,
+                      page: () => RemedyCreateScreen(),
+                      preventDuplicates: true,
+                    ),
+                  ]),
             ]),
 
         //REQUESTPAGES

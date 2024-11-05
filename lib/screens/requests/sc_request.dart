@@ -51,6 +51,7 @@ class RequestScreen extends StatelessWidget {
               );
             },
           ),
+          const Gap(20),
         ],
       ),
       body: LayoutBuilder(builder: (context, constraint) {

@@ -17,6 +17,8 @@ class UserModel {
   String? name;
   String? email;
   String? role;
+  String? avatar;
+  String? status;
   String? email_verified_at;
   String? updated_at;
   String? created_at;
@@ -31,11 +33,17 @@ class UserModel {
     this.created_at,
   });
 
+  static List<UserModel> listFromJson(List<dynamic> json) {
+    return json.map((e) => UserModel.fromJson(e)).toList();
+  }
+
   UserModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
     email = json['email'];
     role = json['role'];
+    avatar = json['avatar'];
+    status = json['status'];
     email_verified_at = json['email_verified_at'];
     created_at = json['created_at'];
     updated_at = json['updated_at'];
@@ -46,6 +54,8 @@ class UserModel {
       'name': name,
       'email': email,
       'role': role,
+      'avatar': avatar,
+      'status': status,
       'email_verified_at': email_verified_at,
     };
   }

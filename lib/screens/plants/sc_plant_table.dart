@@ -1,13 +1,13 @@
+import 'dart:typed_data';
+
+import 'package:admin/api/image_provider/api_image_provider.dart';
 import 'package:admin/controllers/ct_plant.dart';
-import 'package:admin/data/table/dt_plant.dart';
-import 'package:admin/models/plant/md_plant.dart';
 import 'package:admin/routes/rt_routers.dart';
 import 'package:admin/widgets/wg_appbar.dart';
 import 'package:admin/widgets/wg_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'dart:html' as html;
 
 class PlantTableScreen extends StatelessWidget {
@@ -23,7 +23,9 @@ class PlantTableScreen extends StatelessWidget {
       drawer: customDrawer(),
       appBar: customAppBar(
         context,
-        isPrimary: true,
+        onBackTap: () {
+          Get.offNamed(CustomRoute.path.plants);
+        },
         title: 'Plants Table',
         actions: [
           InkWell(
@@ -69,7 +71,7 @@ class PlantTableScreen extends StatelessWidget {
           child: Column(
             children: [
               _buildSmallNavigation('Go To Remedy Table'),
-              const Gap(20),
+              const Gap(10),
               _buildTable(constraint),
             ],
           ),
@@ -79,61 +81,132 @@ class PlantTableScreen extends StatelessWidget {
   }
 
   Widget _buildSmallNavigation(String title) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        TextButton(
-          onPressed: () {
-            Get.offAndToNamed(CustomRoute.path.remediesTable);
-          },
-          child: Text(
-            title,
-            style: const TextStyle(
-              decoration: TextDecoration.underline,
-              decorationColor: Color(0xFF007E62),
-              color: Color(0xFF007E62),
-              fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Wrap(
+            spacing: 20,
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              TextField(
+                controller: TextEditingController(),
+                style: const TextStyle(color: Colors.black, fontSize: 16),
+                decoration: InputDecoration(
+                  labelText: 'Search',
+                  prefixIcon: const Icon(Icons.search),
+                  constraints:
+                      const BoxConstraints(maxWidth: 240, maxHeight: 40),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              MaterialButton(
+                color: const Color(0xFF007E62),
+                textColor: Colors.white,
+                onPressed: () {
+                  Get.toNamed(CustomRoute.path.plantsCreate);
+                },
+                child: const Text(
+                  'Add Plant',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          TextButton(
+            onPressed: () {
+              Get.offAndToNamed(CustomRoute.path.remediesTable);
+            },
+            child: Text(
+              title,
+              style: const TextStyle(
+                decoration: TextDecoration.underline,
+                decorationColor: Color(0xFF007E62),
+                color: Color(0xFF007E62),
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildTable(constraint) {
-    return Expanded(
+    return Container(
+      color: const Color(0xFFE4FFF2),
+      width: constraint.maxWidth,
+      height: constraint.maxHeight - 115,
       child: Obx(() {
-        return Stack(
-          children: [
-            SfDataGrid(
-              onCellTap: (DataGridCellTapDetails details) {
-                int rowIndex = details.rowColumnIndex.rowIndex;
-                if (rowIndex != 0) {
-                  int plantID = plantController.dataSource.rows
-                      .elementAt(details.rowColumnIndex.rowIndex - 1)
-                      .getCells()[1]
-                      .value;
-                  print(plantID);
-                }
-              },
-              columnWidthMode: ColumnWidthMode.fill,
-              sortingGestureType: SortingGestureType.tap,
-              allowSorting: true,
-              headerGridLinesVisibility: GridLinesVisibility.horizontal,
-              gridLinesVisibility: GridLinesVisibility.horizontal,
-              shrinkWrapColumns: true,
-              source: plantController.dataSource,
-              columns: plantController.dataSource.columns,
-            ),
-
-            //
-
-            if (plantController.isLoading.value == true)
-              _buildLoading(constraint),
-            if (plantController.isError.value == true) _buildError(constraint),
-          ],
-        );
+        return ListView.builder(
+            itemCount: plantController.plantData.value.length,
+            itemBuilder: (context, index) {
+              var plant = plantController.plantData.value[index];
+              return Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  border: Border.symmetric(
+                    horizontal: BorderSide(
+                      color: Color.fromARGB(255, 231, 231, 231),
+                    ),
+                  ),
+                ),
+                child: ListTile(
+                  tileColor: Colors.white,
+                  style: ListTileStyle.list,
+                  leading: SizedBox(
+                    width: 60,
+                    height: 60,
+                    child: _loadingImage(plant.cover!),
+                  ),
+                  title: Text(
+                    '${plant.name}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text('${plant.scientific}'),
+                  trailing: _buildStatusContainer('${plant.status}'),
+                ),
+              );
+            });
       }),
+    );
+  }
+
+  Widget _loadingImage(String path) {
+    return FutureBuilder(
+      future: fetchApiImageBytes(path),
+      builder: (context, snapshot) {
+        if (snapshot.hasError || !snapshot.hasData) {
+          return Image.asset('assets/placeholder/plant_image1.jpg');
+        }
+        if (snapshot.hasData) {
+          return Image.memory(
+            snapshot.data as Uint8List,
+          );
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
+    );
+  }
+
+  Widget _buildStatusContainer(String status) {
+    return Container(
+      color: status == 'Active'
+          ? Colors.green
+          : status == 'In Active'
+              ? const Color(0xFFD3A21A)
+              : Colors.grey,
+      width: 80,
+      height: 20,
+      child: Center(
+          child: Text(status, style: const TextStyle(color: Colors.white))),
     );
   }
 
