@@ -653,6 +653,7 @@ mixin FormFuntionality {
     coverImage.value = null;
     otherImages.clear();
     ailments.clear();
+    html.window.location.reload();
   }
 
   void cancelModalWarning() {
