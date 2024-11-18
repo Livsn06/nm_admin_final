@@ -18,7 +18,7 @@ class WorkplaceModel {
   String? description;
   String? additional_info;
   String? status;
-  List<ApiImageModel>? images;
+  List<String>? images;
   bool? is_accepted;
   UserModel? request_by;
   UserModel? accept_by;
@@ -51,9 +51,6 @@ class WorkplaceModel {
     description = json['description'];
     additional_info = json['additional_info'];
     status = json['status'];
-    images = json['images'] != null
-        ? ApiImageModel.listFromJson(json['images'])
-        : null;
     is_accepted = json['is_accepted'] == 1 ? true : false;
     request_by = json['request_by'] != null
         ? UserModel.fromJson(json['user_requestby'])

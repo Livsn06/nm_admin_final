@@ -243,40 +243,40 @@ mixin SignUpFormController {
   ErrorModel? error;
   bool showPassword = false;
   void registerCredentials() async {
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
+    // if (!formKey.currentState!.validate()) {
+    //   return;
+    // }
 
-    var credentials = SignupModel(
-      firstName: firstNameController.text,
-      lastName: lastNameController.text,
-      email: emailController.text,
-      password: passwordController.text,
-      confirmPassword: confirmPasswordController.text,
-    );
+    // var credentials = SignupModel(
+    //   firstName: firstNameController.text,
+    //   lastName: lastNameController.text,
+    //   email: emailController.text,
+    //   password: passwordController.text,
+    //   confirmPassword: confirmPasswordController.text,
+    // );
 
-    showLoading();
+    // showLoading();
 
-    var response = await SignupApi.auth.register(credentials);
-    Get.close(1);
-    if (response == null) {
-      showFailedDialog('Failed', 'Something went Wrong!');
-    }
+    // var response = await SignupApi.auth.register(credentials);
+    // Get.close(1);
+    // if (response == null) {
+    //   showFailedDialog('Failed', 'Something went Wrong!');
+    // }
 
-    if (response!.success == false && response.errors != null) {
-      error = ErrorModel.fromJson(response.errors!);
-      formKey.currentState!.validate();
-      error = null;
-      return;
-    }
+    // if (response!.success == false && response.errors != null) {
+    //   error = ErrorModel.fromJson(response.errors!);
+    //   formKey.currentState!.validate();
+    //   error = null;
+    //   return;
+    // }
 
-    if (response.success == true) {
-      Future.delayed(const Duration(seconds: 1), () {
-        print('GO TO LOGIN');
-      });
-      showSuccessDialog('Success', 'Registered successfully!');
-      resetForm();
-    }
+    // if (response.success == true) {
+    //   Future.delayed(const Duration(seconds: 1), () {
+    //     print('GO TO LOGIN');
+    //   });
+    //   showSuccessDialog('Success', 'Registered successfully!');
+    //   resetForm();
+    // }
   }
 
 //Controls

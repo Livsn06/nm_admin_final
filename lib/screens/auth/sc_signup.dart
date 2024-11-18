@@ -1,6 +1,7 @@
 import 'package:admin/api/auth/api_signup.dart';
 import 'package:admin/models/auth/md_signup.dart';
 import 'package:admin/models/error/md_error.dart';
+import 'package:admin/models/user/md_user.dart';
 import 'package:admin/routes/rt_routers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -259,33 +260,32 @@ mixin SignUpFormController {
       return;
     }
 
-    var credentials = SignupModel(
-      firstName: firstNameController.text,
-      lastName: lastNameController.text,
+    var user = UserModel(
+      firstname: firstNameController.text,
+      lastname: lastNameController.text,
       email: emailController.text,
       password: passwordController.text,
-      confirmPassword: confirmPasswordController.text,
+      confirm_password: confirmPasswordController.text,
     );
 
-    showLoading();
+    showLoading('Registering', 'Please wait...');
 
-    var response = await SignupApi.auth.register(credentials);
+    var response = await SignupApi.auth.register(user);
     Get.close(1);
-    if (response == null) {
+
+    if (response.clientError ?? false) {
       showFailedDialog('Failed', 'Something went Wrong!');
+      return;
     }
 
-    if (response!.success == false && response.errors != null) {
+    if (response.success == false && response.errors != null) {
       error = ErrorModel.fromJson(response.errors!);
       formKey.currentState!.validate();
       error = null;
       return;
     }
 
-    if (response.success == true) {
-      Future.delayed(const Duration(seconds: 1), () {
-        print('GO TO LOGIN');
-      });
+    if (response.success == true && response.data != null) {
       showSuccessDialog('Success', 'Registered successfully!');
       resetForm();
     }
@@ -310,8 +310,11 @@ mixin SignUpFormController {
     if (value == null || value.isEmpty) {
       return 'Required. Please enter your first name';
     }
-    if (!GetUtils.isAlphabetOnly(value)) {
+    if (!GetUtils.isAlphabetOnly(value.removeAllWhitespace)) {
       return 'Invalid. First name can only contain alphabets';
+    }
+    if (error?.name != null) {
+      return error?.name;
     }
     return null;
   }
@@ -320,8 +323,12 @@ mixin SignUpFormController {
     if (value == null || value.isEmpty) {
       return 'Required. Please enter your last name';
     }
-    if (!GetUtils.isAlphabetOnly(value)) {
+    if (!GetUtils.isAlphabetOnly(value.removeAllWhitespace)) {
       return 'Invalid. Last name can only contain alphabets';
+    }
+
+    if (error?.name != null) {
+      return error?.name;
     }
     return null;
   }
@@ -379,18 +386,18 @@ mixin SignUpFormController {
   }
 
   //Modals
-  void showLoading() {
+  void showLoading(String? title, String? subtitle) {
     Get.defaultDialog(
-      title: 'Authentication',
+      title: '$title',
       barrierDismissible: false,
       titlePadding: const EdgeInsets.all(10),
       contentPadding: const EdgeInsets.all(10),
-      content: const Center(
+      content: Center(
         child: Column(
           children: [
-            Text('Please wait...'),
-            Gap(10),
-            CircularProgressIndicator(
+            Text('$subtitle'),
+            const Gap(10),
+            const CircularProgressIndicator(
               color: Color(0xFF007E62),
               strokeWidth: 2,
             ),

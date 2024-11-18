@@ -11,7 +11,6 @@ import 'package:admin/screens/settings/sc_settings.dart';
 import 'package:admin/screens/start/sc_landing.dart';
 import 'package:admin/screens/workplace/sc_workplace.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart';
 
 import '../middlewares/mw_auth.dart';
 import '../middlewares/mw_session.dart';
@@ -21,7 +20,7 @@ import '../screens/dashboard/sc_dashboard.dart';
 import '../screens/notification/sc_notification.dart';
 import '../screens/plants/sc_plant.dart';
 import '../screens/requests/sc_request.dart';
-import '../screens/users/sc_user.dart';
+import '../screens/users/sc_user_table.dart';
 
 enum RouteSetting {
   root,
@@ -124,21 +123,30 @@ class AppRoute {
         GetPage(
           name: RouteSetting.signup.name,
           page: () => SignupScreen(),
+          middlewares: [
+            RouteMiddleware(5),
+            SessionMiddleware(5),
+          ],
         ),
         GetPage(
-            name: RouteSetting.login.name,
-            page: () => LoginScreen(),
-            children: [
-              GetPage(
-                  name: RouteSetting.searchEmail.name,
-                  page: () => ForgotPasswordScreen(),
-                  children: [
-                    GetPage(
-                      name: RouteSetting.resetPassword.name,
-                      page: () => ResetPasswordScreen(),
-                    ),
-                  ]),
-            ]),
+          name: RouteSetting.login.name,
+          page: () => LoginScreen(),
+          children: [
+            GetPage(
+                name: RouteSetting.searchEmail.name,
+                page: () => ForgotPasswordScreen(),
+                middlewares: [
+                  RouteMiddleware(5),
+                  SessionMiddleware(5),
+                ],
+                children: [
+                  GetPage(
+                    name: RouteSetting.resetPassword.name,
+                    page: () => ResetPasswordScreen(),
+                  ),
+                ]),
+          ],
+        ),
       ],
     ),
 
@@ -161,7 +169,7 @@ class AppRoute {
             children: <GetPage>[
               GetPage(
                 name: RouteSetting.plantTable.name,
-                page: () => PlantTableScreen(),
+                page: () => const PlantTableScreen(),
                 preventDuplicates: true,
                 children: [
                   GetPage(
@@ -205,7 +213,7 @@ class AppRoute {
         //USERPAGES
         GetPage(
           name: RouteSetting.users.name,
-          page: () => const UserScreen(),
+          page: () => const UserTableScreen(),
         ),
 
         //NOTIFICATIONPAGES

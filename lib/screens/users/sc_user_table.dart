@@ -1,32 +1,29 @@
-import 'dart:typed_data';
-
-import 'package:admin/api/image/api_image.dart';
-import 'package:admin/api/plant/api_plant.dart';
-
-import 'package:admin/controllers/ct_plant.dart';
-import 'package:admin/routes/rt_routers.dart';
-import 'package:admin/sessions/sn_plant.dart';
+import 'package:admin/controllers/ct_user.dart';
 import 'package:admin/widgets/wg_appbar.dart';
 import 'package:admin/widgets/wg_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:get/get.dart';
 import 'dart:html' as html;
 
-class PlantTableScreen extends StatefulWidget with OtherFunctionality {
-  const PlantTableScreen({super.key});
+import 'package:get/get.dart';
+
+import '../../api/image/api_image.dart';
+import '../../routes/rt_routers.dart';
+
+class UserTableScreen extends StatefulWidget with OtherFunctionality {
+  const UserTableScreen({super.key});
 
   @override
-  State<PlantTableScreen> createState() => _PlantTableScreenState();
+  State<UserTableScreen> createState() => _UserTableScreenState();
 }
 
-class _PlantTableScreenState extends State<PlantTableScreen> {
-  var plantController = Get.put(PlantController());
+class _UserTableScreenState extends State<UserTableScreen> {
+  var userController = Get.put(UserController());
 
   //
   @override
   Widget build(BuildContext context) {
-    html.document.title = 'Naturemedix | Plants';
+    html.document.title = 'Naturemedix | Users';
     return Scaffold(
       drawer: customDrawer(),
       appBar: customAppBar(
@@ -34,7 +31,7 @@ class _PlantTableScreenState extends State<PlantTableScreen> {
         onBackTap: () {
           Get.offNamed(CustomRoute.path.plants);
         },
-        title: 'Plants Table',
+        title: 'Users Table',
         actions: [
           InkWell(
             highlightColor: Colors.transparent,
@@ -67,7 +64,6 @@ class _PlantTableScreenState extends State<PlantTableScreen> {
               );
             },
           ),
-          const Gap(20),
         ],
       ),
       body: LayoutBuilder(builder: (context, constraint) {
@@ -79,7 +75,7 @@ class _PlantTableScreenState extends State<PlantTableScreen> {
           height: constraint.maxHeight,
           child: Column(
             children: [
-              _buildSmallNavigation('Go To Remedy Table'),
+              _buildSmallNavigation('Go To My Profile'),
               const Gap(10),
               _buildTable(constraint),
             ],
@@ -113,19 +109,19 @@ class _PlantTableScreenState extends State<PlantTableScreen> {
                   ),
                 ),
               ),
-              MaterialButton(
-                color: const Color(0xFF007E62),
-                textColor: Colors.white,
-                onPressed: () {
-                  Get.toNamed(CustomRoute.path.plantsCreate);
-                },
-                child: const Text(
-                  'Add Plant',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+              // MaterialButton(
+              //   color: const Color(0xFF007E62),
+              //   textColor: Colors.white,
+              //   onPressed: () {
+              //     Get.toNamed(CustomRoute.path.plantsCreate);
+              //   },
+              //   child: const Text(
+              //     'Add Plant',
+              //     style: TextStyle(
+              //       fontWeight: FontWeight.bold,
+              //     ),
+              //   ),
+              // ),
             ],
           ),
           TextButton(
@@ -154,9 +150,9 @@ class _PlantTableScreenState extends State<PlantTableScreen> {
       height: constraint.maxHeight - 115,
       child: Obx(() {
         return ListView.builder(
-            itemCount: plantController.plantData.value.length,
+            itemCount: userController.usersRoleUser.value.length,
             itemBuilder: (context, index) {
-              var plant = plantController.plantData.value[index];
+              var user = userController.usersRoleUser.value[index];
               return Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
@@ -167,39 +163,24 @@ class _PlantTableScreenState extends State<PlantTableScreen> {
                   ),
                 ),
                 child: ListTile(
-                  onTap: () async {
-                    await SessionPlant.addEditPlant(plant);
-                    Get.toNamed(
-                      CustomRoute.path.plantsCreate,
-                      preventDuplicates: true,
-                    );
-                  },
+                  onTap: () {},
                   tileColor: Colors.white,
                   style: ListTileStyle.list,
                   leading: SizedBox(
                     width: 60,
                     height: 60,
-                    child: plant.cover == null
-                        ? Image.asset('assets/placeholder/plant_image1.jpg')
-                        : _loadingImage(plant.cover!),
+                    child: user.avatar == null
+                        ? Image.asset('assets/placeholder/user_avata1.png')
+                        : _loadingImage(user.avatar!),
                   ),
                   title: Text(
-                    '${plant.name}',
+                    '${user.firstname} ${user.lastname}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: Text('${plant.scientific_name}'),
+                  subtitle: Text('${user.email}'),
                   trailing: InkWell(
-                    child: _buildStatusContainer('${plant.status}'),
-                    onTap: () async {
-                      var status = plant.status;
-                      status = status == 'Active' ? 'Inactive' : 'Active';
-                      var isUpdate = await widget.changeStatusModal(status);
-                      if (isUpdate) {
-                        plant.status = status;
-                        await ApiPlant.updateStatus(plant: plant);
-                      }
-                      setState(() {});
-                    },
+                    child: _buildStatusContainer('${user.status}'),
+                    onTap: () {},
                   ),
                 ),
               );
@@ -213,7 +194,7 @@ class _PlantTableScreenState extends State<PlantTableScreen> {
       future: ApiImage.getImage(path),
       builder: (context, snapshot) {
         if (snapshot.hasError || !snapshot.hasData) {
-          return Image.asset('assets/placeholder/plant_image1.jpg');
+          return Image.asset('assets/placeholder/user_avata1.png');
         }
         if (snapshot.hasData) {
           var data = snapshot.data;
@@ -261,7 +242,7 @@ class _PlantTableScreenState extends State<PlantTableScreen> {
           color: Colors.blue,
           textColor: Colors.white,
           onPressed: () {
-            plantController.loadPlantData();
+            userController.loadAllData();
           },
           child: const Text('Retry'),
         ),

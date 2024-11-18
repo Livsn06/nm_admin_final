@@ -34,22 +34,21 @@ class UsageModel {
   }
 
   UsageModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
+    id = json['id'] != null ? int.parse(json['id'].toString()) : 0;
     name = json['name'];
     type = json['type'];
     description = json['description'];
-    remedy_id = json['remedy_id'];
+    remedy_id = json['remedy_id'] == null ? 0 : int.parse(json['remedy_id']);
     created_at = json['created_at'];
     updated_at = json['updated_at'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
+    data['id'] = id.toString();
     data['name'] = name;
-    data['type'] = type;
     data['description'] = description;
-    data['remedy_id'] = remedy_id;
+    data['remedy_id'] = remedy_id.toString();
     return data;
   }
 }

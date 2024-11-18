@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:admin/controllers/ct_requestplant.dart';
 
 import 'package:admin/routes/rt_routers.dart';
@@ -54,6 +56,7 @@ class RequestTableScreen extends StatelessWidget {
               );
             },
           ),
+          const Gap(20),
         ],
       ),
       body: LayoutBuilder(builder: (context, constraint) {
@@ -147,8 +150,8 @@ class RequestTableScreen extends StatelessWidget {
                     height: 70,
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: NetworkImage(
-                          '${request.images?[0].name}',
+                        image: MemoryImage(
+                          request.images?[0].image_data as Uint8List,
                         ),
                       ),
                     ),

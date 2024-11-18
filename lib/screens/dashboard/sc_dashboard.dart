@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:admin/controllers/ct_plant.dart';
 import 'package:admin/controllers/ct_requestplant.dart';
 import 'package:admin/controllers/ct_user.dart';
@@ -242,7 +244,7 @@ class DashboardScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: NetworkImage(
-                          '${workplace.images?[0].path}',
+                          '${workplace.images?[0]}',
                         ),
                       ),
                     ),
@@ -313,8 +315,8 @@ class DashboardScreen extends StatelessWidget {
                             leading: CircleAvatar(
                               backgroundColor: Colors.transparent,
                               radius: 20,
-                              child: Image.network(
-                                '${data.images?[0].path}',
+                              child: Image.memory(
+                                data.images?[0].image_data ?? Uint8List(0),
                               ),
                             ),
                             title: Text('${data.plantName}'),

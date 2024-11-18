@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:admin/api/image/api_image.dart';
 import 'package:admin/controllers/ct_plant.dart';
 import 'package:admin/controllers/ct_remedy.dart';
 import 'package:admin/routes/rt_routers.dart';
@@ -52,6 +55,7 @@ class RemedyTableScreen extends StatelessWidget {
               );
             },
           ),
+          const Gap(20),
         ],
       ),
       body: LayoutBuilder(builder: (context, constraint) {
@@ -156,18 +160,52 @@ class RemedyTableScreen extends StatelessWidget {
                   leading: SizedBox(
                     width: 60,
                     height: 60,
-                    child: Image.asset('assets/sample_image/ast_sample1.png'),
+                    child: remedy.cover == null
+                        ? Image.asset('assets/placeholder/plant_image1.jpg')
+                        : _loadingImage(remedy.cover!),
                   ),
                   title: Text(
                     '${remedy.name}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: Text('${remedy.type}'),
+                  subtitle: _ratingCounter(remedy.rating),
                   trailing: _buildStatusContainer('${remedy.status}'),
                 ),
               );
             });
       }),
+    );
+  }
+
+  Widget _ratingCounter(rate) {
+    List<Widget> rating = [];
+    for (int i = 0; i < 5; i++) {
+      if (i < rate) {
+        rating.add(Icon(Icons.star, color: Colors.yellow.shade700, size: 15));
+      } else {
+        rating.add(Icon(Icons.star, color: Colors.grey.shade400, size: 15));
+      }
+    }
+    return Row(
+      children: rating,
+    );
+  }
+
+  Widget _loadingImage(path) {
+    return FutureBuilder(
+      future: ApiImage.getImage(path),
+      builder: (context, snapshot) {
+        if (snapshot.hasError || !snapshot.hasData) {
+          return Image.asset('assets/placeholder/plant_image1.jpg');
+        }
+        if (snapshot.hasData) {
+          return Image.memory(
+            snapshot.data as Uint8List,
+          );
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
     );
   }
 

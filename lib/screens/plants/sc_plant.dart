@@ -51,6 +51,7 @@ class PlantScreen extends StatelessWidget {
               );
             },
           ),
+          const Gap(10),
         ],
       ),
       body: LayoutBuilder(builder: (context, constraint) {

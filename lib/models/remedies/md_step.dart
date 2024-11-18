@@ -7,6 +7,9 @@
 //                     "updated_at": "2024-10-31T10:19:00.000000Z"
 //                 },
 
+import 'package:admin/controllers/ct_remedy.dart';
+import 'package:admin/models/remedies/md_remedy.dart';
+
 class StepModel {
   int? id;
   String? name;
@@ -30,9 +33,9 @@ class StepModel {
   }
 
   StepModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
+    id = json['id'] != null ? int.parse(json['id'].toString()) : 0;
     name = json['name'];
-    remedy_id = json['remedy_id'];
+    remedy_id = json['remedy_id'] == null ? int.parse(json['remedy_id']) : 0;
     description = json['description'];
     created_at = json['created_at'];
     updated_at = json['updated_at'];
@@ -40,12 +43,10 @@ class StepModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
+    data['id'] = id.toString();
     data['name'] = name;
-    data['remedy_id'] = remedy_id;
+    data['remedy_id'] = remedy_id.toString();
     data['description'] = description;
-    data['created_at'] = created_at;
-    data['updated_at'] = updated_at;
     return data;
   }
 }

@@ -10,34 +10,32 @@ class SessionAccess {
   Future<void> createSession(UserModel admin, String token) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setInt('id', admin.id!);
-    prefs.setString('name', '${admin.name}');
+    prefs.setString('firstname', '${admin.firstname}');
+    prefs.setString('lastname', '${admin.lastname}');
     prefs.setString('email', '${admin.email}');
-    prefs.setString('role', '${admin.role}');
-    prefs.setString('status', admin.status ?? 'In Active');
-    prefs.setString('avatar', '${admin.avatar}');
-    prefs.setString('email_verified_at', '${admin.email_verified_at}');
-    prefs.setString('created_at', '${admin.created_at}');
-    prefs.setString('updated_at', '${admin.updated_at}');
     prefs.setString('token', token);
-    log('Session created Successfully', name: 'SESSION');
+    prefs.setString('status', admin.status!);
+    prefs.setString('created_at', admin.created_at!);
+    prefs.setString('updated_at', admin.updated_at!);
+    log('Session created Successfully', name: 'SESSION CREATED');
   }
 
   Future<UserModel> getSessionData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int? id = prefs.getInt('id');
-    String? name = prefs.getString('name');
+    String? firstname = prefs.getString('firstname');
+    String? lastname = prefs.getString('lastname');
     String? email = prefs.getString('email');
-    String? role = prefs.getString('role');
-    String? emailVerifiedAt = prefs.getString('email_verified_at');
+    String? status = prefs.getString('status');
     String? createdAt = prefs.getString('created_at');
     String? updatedAt = prefs.getString('updated_at');
 
     UserModel admin = UserModel(
       id: id,
-      name: name,
+      firstname: firstname,
+      lastname: lastname,
       email: email,
-      role: role,
-      email_verified_at: emailVerifiedAt,
+      status: status,
       created_at: createdAt,
       updated_at: updatedAt,
     );
@@ -92,15 +90,15 @@ class SessionAccess {
 
   Future<void> savedEmail(UserModel admin) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt('id', admin.id!);
-    prefs.setString('name', '${admin.name}');
-    prefs.setString('email', '${admin.email}');
-    prefs.setString('role', '${admin.role}');
-    prefs.setString('status', admin.status ?? 'In Active');
-    prefs.setString('avatar', '${admin.avatar}');
-    prefs.setString('email_verified_at', '${admin.email_verified_at}');
-    prefs.setString('created_at', '${admin.created_at}');
-    prefs.setString('updated_at', '${admin.updated_at}');
-    log('Email saved Successfully', name: 'SESSION');
+    // prefs.setInt('id', admin.id!);
+    // prefs.setString('name', '${admin.name}');
+    // prefs.setString('email', '${admin.email}');
+    // prefs.setString('role', '${admin.role}');
+    // prefs.setString('status', admin.status ?? 'In Active');
+    // prefs.setString('avatar', '${admin.avatar}');
+    // prefs.setString('email_verified_at', '${admin.email_verified_at}');
+    // prefs.setString('created_at', '${admin.created_at}');
+    // prefs.setString('updated_at', '${admin.updated_at}');
+    // log('Email saved Successfully', name: 'SESSION');
   }
 }

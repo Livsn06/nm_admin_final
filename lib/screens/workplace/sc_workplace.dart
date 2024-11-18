@@ -186,7 +186,7 @@ class TabBody extends StatelessWidget {
             plantname: plant.plantName!,
             status: plant.status!,
             date: plant.updated_at!,
-            plantimage: '${plant.images?[0].path}',
+            plantimage: '${plant.images?[0]}',
             ontap: () {},
           );
         },

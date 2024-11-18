@@ -42,35 +42,35 @@ mixin DataSourceApi {
 
     //
     isLoading.value = true;
-    var value = await ApiPlant.fetchAllPlants();
+    var response = await ApiPlant.fetchAllPlants();
 
-    if (value == null) {
-      isLoading.value = false;
-      isError.value = true;
-    } else {
+    if (response.success && response.dataList != null) {
       isLoading.value = false;
       isError.value = false;
+      return PlantModel.listFromJson(response.dataList!);
+    } else {
+      isLoading.value = false;
+      isError.value = true;
+      return null;
     }
-
-    return value;
   }
 
-  Future<PlantModel> getApiDataById(int id) async {
+  Future<PlantModel?> getApiDataById(int id) async {
     stateReset();
 
     isLoading.value = true;
 
-    var value = await ApiPlant.getPlants(id);
+    var response = await ApiPlant.getPlant(id);
 
-    if (value == null) {
-      isLoading.value = false;
-      isError.value = true;
-    } else {
+    if (response.success && response.data != null) {
       isLoading.value = false;
       isError.value = false;
+      return PlantModel.fromJson(response.data!);
+    } else {
+      isLoading.value = false;
+      isError.value = true;
+      return null;
     }
-
-    return value!;
   }
 
   void stateReset() {

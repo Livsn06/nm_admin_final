@@ -1,12 +1,17 @@
 import 'dart:developer';
 import 'dart:typed_data';
 
+import 'package:admin/api/image/api_image.dart';
 import 'package:admin/api/plant/api_plant.dart';
 import 'package:admin/models/form/md_form_image.dart';
 import 'package:admin/models/plant/md_plant.dart';
+import 'package:admin/models/plant/md_plant_local_name.dart';
+import 'package:admin/models/plant/md_plant_treatment.dart';
 import 'package:admin/models/remedies/md_ailment.dart';
+import 'package:admin/models/response/md_response.dart';
 import 'package:admin/routes/rt_routers.dart';
 import 'package:admin/sessions/sn_access.dart';
+import 'package:admin/sessions/sn_plant.dart';
 import 'package:admin/widgets/wg_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -23,11 +28,19 @@ class PlantCreateScreen extends StatefulWidget with FormFuntionality {
 
 class _PlantCreateScreenState extends State<PlantCreateScreen> {
   @override
+  void initState() {
+    super.initState();
+    widget.checkEditMode(() {
+      setState(() {});
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: customAppBar(
         context,
-        title: 'Create Plant',
+        title: widget.isEditMode.value ? 'Edit Plant' : 'Create Plant',
         onBackTap: () {
           widget.cancelModalWarning();
         },
@@ -43,6 +56,10 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
               child: Column(
                 children: [
                   _buildBasicInfoFormField(),
+                  const Gap(20),
+                  divider(),
+                  const Gap(20),
+                  _buildLocalNameFormField(),
                   const Gap(20),
                   divider(),
                   const Gap(20),
@@ -91,7 +108,11 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
             const Color(0xFF007E62),
             title: 'Submit',
             onTap: () {
-              widget.uploadlModalWarning();
+              if (widget.isEditMode.value) {
+                widget.updateModalWarning();
+              } else {
+                widget.uploadModalWarning();
+              }
             },
           ),
         ],
@@ -120,6 +141,45 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
               label: 'Description',
               controller: widget.modalDescriptionController,
               is_Multiline: true,
+            ),
+            const Gap(20),
+            Row(
+              children: [
+                const Spacer(),
+                _buildCustomButton(
+                  Colors.red,
+                  title: 'Cancel',
+                  onTap: onCancel,
+                ),
+                const Gap(30),
+                _buildCustomButton(
+                  const Color(0xFF007E62),
+                  title: 'Add',
+                  onTap: onAdd,
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _buildModalLocalNameAdd(title,
+      {required Function()? onCancel, required Function()? onAdd}) {
+    Get.defaultDialog(
+      barrierDismissible: false,
+      titlePadding: const EdgeInsets.all(10),
+      contentPadding: const EdgeInsets.all(20),
+      title: '$title',
+      content: SizedBox(
+        width: 500,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            _buildTextFieldForm(
+              label: 'Name',
+              controller: widget.modalLocalNameController,
             ),
             const Gap(20),
             Row(
@@ -173,7 +233,7 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
                         return;
                       }
                       widget.ailments.add(
-                        AilmentModel(
+                        PlantTreatmentModel(
                           name: widget.modalTitleController.text,
                           description: widget.modalDescriptionController.text,
                         ),
@@ -225,7 +285,7 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
                         Get.close(1);
                       },
                       onAdd: () {
-                        widget.ailments[index] = AilmentModel(
+                        widget.ailments[index] = PlantTreatmentModel(
                           name: widget.modalTitleController.text,
                           description: widget.modalDescriptionController.text,
                         );
@@ -252,6 +312,96 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
               },
             ),
           )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocalNameFormField() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _buildFormTitle(title: 'Local Name'),
+              const Spacer(),
+              _buildAddButton(
+                title: 'Add Local Name',
+                onAdd: () {
+                  _buildModalLocalNameAdd('Add Local Name', onCancel: () {
+                    widget.modalLocalNameController.clear();
+                    Get.close(1);
+                  }, onAdd: () {
+                    widget.localNames.add(widget.modalLocalNameController.text);
+                    setState(() {
+                      widget.modalLocalNameController.clear();
+                      Get.close(1);
+                    });
+                  });
+                },
+              ),
+            ],
+          ),
+          const Gap(20),
+          SizedBox(
+            width: double.infinity,
+            height: 40,
+            child: GridView.builder(
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              itemCount:
+                  widget.localNames.isEmpty ? 1 : widget.localNames.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 1,
+                crossAxisSpacing: 5,
+                mainAxisSpacing: 10,
+                childAspectRatio: widget.localNames.isEmpty ? 1 / 8 : 2 / 6,
+              ),
+              itemBuilder: (context, index) {
+                if (widget.localNames.isEmpty) {
+                  return const Text(
+                    'No local name added yet.',
+                    style: TextStyle(color: Colors.grey),
+                  );
+                }
+                var name = widget.localNames[index];
+                return InkWell(
+                  onTap: () {
+                    widget.modalLocalNameController.text = name;
+                    _buildModalLocalNameAdd(
+                      'Edit Local Name',
+                      onCancel: () {
+                        widget.modalLocalNameController.clear();
+                        Get.close(1);
+                      },
+                      onAdd: () {
+                        widget.localNames[index] =
+                            widget.modalLocalNameController.text;
+                        setState(() {
+                          widget.modalLocalNameController.clear();
+                          Get.close(1);
+                        });
+                      },
+                    );
+                  },
+                  child: Chip(
+                    padding: const EdgeInsets.all(10),
+                    deleteIcon: const Icon(Icons.clear),
+                    deleteIconColor: Colors.red,
+                    onDeleted: () {
+                      setState(() {
+                        widget.localNames.remove(name);
+                      });
+                    },
+                    label: Text(name),
+                  ),
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -417,6 +567,7 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
           _buildTextFieldForm(
             label: 'Scientific Name',
             controller: widget.plantScientificNameController,
+            isReadOnly: widget.isEditMode.value,
           ),
           const Gap(30),
           _buildTextFieldForm(
@@ -527,10 +678,16 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
     );
   }
 
-  Widget _buildTextFieldForm({label, controller, is_Multiline = false}) {
+  Widget _buildTextFieldForm({
+    label,
+    controller,
+    is_Multiline = false,
+    isReadOnly = false,
+  }) {
     return TextFormField(
       controller: controller,
       maxLines: is_Multiline ? 5 : 1,
+      readOnly: isReadOnly,
       decoration: _buildFormDecoration(label: label),
     );
   }
@@ -551,15 +708,19 @@ mixin FormFuntionality {
   final plantDescriptionController = TextEditingController();
   final modalTitleController = TextEditingController();
   final modalDescriptionController = TextEditingController();
+  final modalLocalNameController = TextEditingController();
 
   //
   final Rx<FormImageModel?> coverImage = Rx<FormImageModel?>(null);
-  final List<AilmentModel> ailments = [];
+  final List<String> localNames = [];
+  final List<PlantTreatmentModel> ailments = [];
   final RxList<FormImageModel> otherImages = RxList<FormImageModel>([]);
+  final RxString progressMessage = ''.obs;
+  final RxBool isEditMode = false.obs;
 
   void pickCoverImage() {
     html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-    uploadInput.accept = 'image/*';
+    uploadInput.accept = 'image/jpeg,image/png,image/jpg';
     uploadInput.click();
 
     uploadInput.onChange.listen((e) async {
@@ -608,7 +769,8 @@ mixin FormFuntionality {
     }
 
     html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-    uploadInput.accept = 'image/*';
+    //only jpeg, png and jpg
+    uploadInput.accept = 'image/jpeg,image/png,image/jpg';
     uploadInput.multiple = true;
 
     uploadInput.click();
@@ -700,6 +862,7 @@ mixin FormFuntionality {
           color: Colors.red,
           textColor: Colors.white,
           onPressed: () {
+            exitEditMode();
             Get.offNamed(CustomRoute.path.plantsTable);
           },
           child: const Text('Yes'),
@@ -708,7 +871,7 @@ mixin FormFuntionality {
     );
   }
 
-  void uploadlModalWarning() {
+  void uploadModalWarning() {
     if (!formKey.currentState!.validate()) {
       return;
     }
@@ -788,6 +951,88 @@ mixin FormFuntionality {
     );
   }
 
+  //
+
+  void updateModalWarning() {
+    if (!formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (coverImage.value == null) {
+      Get.snackbar(
+        padding: const EdgeInsets.all(10),
+        'Cover',
+        'Please select an cover image.',
+        backgroundColor: const Color(0xFFFFD4D4),
+        colorText: Colors.black,
+      );
+      return;
+    }
+
+    if (otherImages.isEmpty) {
+      Get.snackbar(
+        padding: const EdgeInsets.all(10),
+        'Images',
+        'Please select at least one image.',
+        backgroundColor: const Color(0xFFFFD4D4),
+        colorText: Colors.black,
+      );
+      return;
+    }
+
+    if (ailments.isEmpty) {
+      Get.snackbar(
+        padding: const EdgeInsets.all(10),
+        'Ailment',
+        'Please add at least one ailment associated.',
+        backgroundColor: const Color(0xFFFFD4D4),
+        colorText: Colors.black,
+      );
+      return;
+    }
+
+    Get.defaultDialog(
+      barrierDismissible: false,
+      titlePadding: const EdgeInsets.all(10),
+      contentPadding: const EdgeInsets.all(20),
+      title: 'Update',
+      content: RichText(
+        textAlign: TextAlign.center,
+        text: const TextSpan(
+          style: TextStyle(color: Colors.black, fontSize: 16),
+          children: [
+            TextSpan(
+              text: 'Proceed with update? \n\n',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextSpan(
+              text: 'You are about to update this plant.',
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        MaterialButton(
+          color: Colors.red,
+          textColor: Colors.white,
+          onPressed: () {
+            Get.close(1);
+          },
+          child: const Text('Wait'),
+        ),
+        MaterialButton(
+          color: const Color(0xFF007E62),
+          textColor: Colors.white,
+          onPressed: () {
+            Get.close(1);
+            updateForm();
+          },
+          child: const Text('Proceed'),
+        ),
+      ],
+    );
+  }
+
   void loadingModal({title, subtitle}) {
     Get.defaultDialog(
       barrierDismissible: false,
@@ -796,16 +1041,18 @@ mixin FormFuntionality {
       title: '$title',
       content: SizedBox(
         width: 230,
-        height: 150,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text('$subtitle'),
-            const Gap(15),
-            const CircularProgressIndicator(),
-          ],
-        ),
+        height: 90,
+        child: Obx(() {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(progressMessage.value),
+              const Gap(15),
+              const CircularProgressIndicator(),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -849,57 +1096,346 @@ mixin FormFuntionality {
         ]);
   }
 
+  void checkEditMode(void Function() setState) async {
+    try {
+      var plant = await SessionPlant.getEditPlant();
+      if (plant != null) {
+        isEditMode.value = true;
+        plantNameController.text = plant.name!;
+        plantDescriptionController.text = plant.description!;
+        plantScientificNameController.text = plant.scientific_name!;
+
+        //
+        var value = await ApiImage.getImage(plant.cover!);
+        if (value != null) {
+          coverImage.value = FormImageModel(
+            name: value.file_name,
+            bytes: value.image_data,
+          );
+        } else {
+          coverImage.value = null;
+        }
+
+        //
+        if (plant.images != null) {
+          for (var i = 0; i < plant.images!.length; i++) {
+            print(plant.images![i].path);
+            var value = await ApiImage.getImage(plant.images![i].path!);
+            if (value != null) {
+              otherImages.add(
+                FormImageModel(
+                  id: plant.images![i].id,
+                  name: value.file_name,
+                  bytes: value.image_data,
+                ),
+              );
+            }
+          }
+        }
+
+        //
+
+        if (plant.ailments != null) {
+          for (var ailment in plant.ailments!) {
+            print(ailment.name);
+            ailments.add(ailment);
+          }
+        }
+
+        //
+        if (plant.local_name != null) {
+          for (var i = 0; i < plant.local_name!.length; i++) {
+            localNames.add(plant.local_name![i].name!);
+          }
+        }
+      }
+
+      //
+    } catch (e) {
+      printError(info: e.toString());
+    }
+
+    setState();
+  }
+
+  void exitEditMode() {
+    isEditMode.value = false;
+    SessionPlant.removeEditPlant();
+  }
+
   void submitForm() async {
     bool isSuccess = false;
 
     var user = await SessionAccess.instance.getSessionData();
+
+    // -----------------------------------------------
     var plant = PlantModel(
       name: plantNameController.text,
       description: plantDescriptionController.text,
-      scientific: plantScientificNameController.text,
-      user_create_by: user,
+      scientific_name: plantScientificNameController.text,
+      create_by: user,
     );
 
-    loadingModal(title: 'Uploading plant...', subtitle: 'Please wait...');
-    var plantUploaded =
-        await ApiPlant.uploadPlant(plant: plant, cover: coverImage.value!);
+    progressMessage.value = 'Uploading your plant...';
+    loadingModal(title: 'Creating Plant');
+    var response = await ApiPlant.uploadPlant(plant: plant);
 
-    if (plantUploaded == null) {
+    if (response.success == false || response.errors != null) {
       Get.close(1);
-      failedModal(title: 'Failed', subtitle: 'Failed to upload plant');
-      print('fail');
+      failedModal(title: 'Failed', subtitle: 'Failed to create plant');
+      return;
+    }
+
+    if (response.clientError ?? false) {
+      Get.close(1);
+      failedModal(title: 'Failed', subtitle: response.message!);
       return;
     }
     //
-    print(plantUploaded.id);
+    var plantUploaded = PlantModel.fromJson(response.data!);
+    if (plantUploaded.id == null) {
+      Get.close(1);
+      failedModal(
+        title: 'Program Failed',
+        subtitle: 'Could not fetch the plant id.',
+      );
+      return;
+    }
+
+    print('Plant ID: ${plantUploaded.id}');
+    //--------------------------------------------------------------
+    progressMessage.value = 'Uploading treatments...';
     for (var ailment in ailments) {
       //
-      var configAilment = AilmentModel(
+      var configAilment = PlantTreatmentModel(
         name: ailment.name,
         description: ailment.description,
-        plant_id: plantUploaded.id!,
+        plant_id: plantUploaded.id,
       );
-      var uploadedAilment = await ApiPlant.uploadPlantAilment(configAilment);
-      print(uploadedAilment?.id ?? 'fail');
-      if (uploadedAilment == null) {
+      var response = await ApiPlant.uploadTeatment(configAilment);
+
+      if (response.success == false || response.errors != null) {
         Get.close(1);
-        failedModal(title: 'Failed', subtitle: 'Failed to upload ailments');
+        failedModal(title: 'Failed', subtitle: 'Failed to create ailment');
+        return;
+      }
+
+      if (response.clientError ?? false) {
+        Get.close(1);
+        failedModal(title: 'Failed', subtitle: response.message!);
         return;
       }
     }
+
+    //--------------------------------------------------------------
+    progressMessage.value = 'Uploading local names...';
+    for (var lcName in localNames) {
+      //
+      var configLCN = PlantLocalNameModel(
+        name: lcName,
+        plant_id: plantUploaded.id,
+      );
+      var response = await ApiPlant.uploadLocalName(configLCN);
+
+      if (response.success == false || response.errors != null) {
+        Get.close(1);
+        failedModal(title: 'Failed', subtitle: 'Failed to create local names');
+        return;
+      }
+
+      if (response.clientError ?? false) {
+        Get.close(1);
+        failedModal(title: 'Failed', subtitle: response.message!);
+        return;
+      }
+    }
+
+    //--------------------------------------------------------------
+    progressMessage.value = 'Uploading images...';
+    response = await ApiPlant.uploadCover(plantUploaded, coverImage.value!);
+
+    if (response.success == false || response.errors != null) {
+      Get.close(1);
+      failedModal(title: 'Failed', subtitle: 'Failed to upload cover image');
+      return;
+    }
+
+    if (response.clientError ?? false) {
+      Get.close(1);
+      failedModal(title: 'Failed', subtitle: response.message!);
+      return;
+    }
+
+    //--------------------------------------------------------------
 
     for (var image in otherImages) {
-      var uploadedImage = await ApiPlant.uploadPlantImage(plantUploaded, image);
+      response = await ApiPlant.uploadImage(plantUploaded, image);
 
-      print(uploadedImage?.id ?? 'fail');
-      if (uploadedImage == null) {
+      if (response.success == false || response.errors != null) {
         Get.close(1);
-        failedModal(title: 'Failed', subtitle: 'Failed to upload images');
+        failedModal(title: 'Failed', subtitle: 'Failed to upload image');
+        return;
+      }
+
+      if (response.clientError ?? false) {
+        Get.close(1);
+        failedModal(title: 'Failed', subtitle: response.message!);
         return;
       }
     }
-    Get.close(1);
 
+    Get.close(1);
     successModal(title: 'Success', subtitle: 'Plant uploaded successfully');
+  }
+
+  ///
+
+  void updateForm() async {
+    try {
+      bool isSuccess = false;
+
+      var user = await SessionAccess.instance.getSessionData();
+      var oldPlant = await SessionPlant.getEditPlant();
+
+      // -----------------------------------------------
+      if (oldPlant == null) {
+        Get.close(1);
+        failedModal(title: 'Failed', subtitle: 'Plant not found');
+        return;
+      }
+
+      //
+      if (user.id == null) {
+        Get.close(1);
+        failedModal(title: 'Failed', subtitle: 'User not found');
+        return;
+      }
+
+      var plant = PlantModel(
+        id: oldPlant.id,
+        name: plantNameController.text,
+        description: plantDescriptionController.text,
+        scientific_name: plantScientificNameController.text,
+        update_by: user,
+        create_by: user,
+      );
+
+      progressMessage.value = 'Updating your plant...';
+      loadingModal(title: 'Updating Plant');
+
+      var response = await ApiPlant.updatePlant(plant: plant);
+
+      if (response.success == false || response.errors != null) {
+        Get.close(1);
+        failedModal(title: 'Failed', subtitle: 'Failed to update plant');
+        return;
+      }
+
+      if (response.clientError ?? false) {
+        Get.close(1);
+        failedModal(title: 'Failed', subtitle: response.message!);
+        return;
+      }
+
+      //--------------------------------------------------------------
+      progressMessage.value = 'Updating treatments...';
+
+      if (ailments.isNotEmpty) {
+        //
+
+        await ApiPlant.clearTreatments(oldPlant.id!);
+
+        for (var ailment in ailments) {
+          //
+          var configAilment = PlantTreatmentModel(
+            name: ailment.name,
+            description: ailment.description,
+            plant_id: oldPlant.id,
+          );
+
+          response = await ApiPlant.uploadTeatment(configAilment);
+
+          if (response.success == false || response.errors != null) {
+            Get.close(1);
+            failedModal(title: 'Failed', subtitle: 'Failed to update ailment');
+            return;
+          }
+
+          if (response.clientError ?? false) {
+            Get.close(1);
+            failedModal(title: 'Failed', subtitle: response.message!);
+            return;
+          }
+        }
+      }
+
+      //--------------------------------------------------------------
+      progressMessage.value = 'Updating local names...';
+      if (localNames.isNotEmpty) {
+        await ApiPlant.clearLocalNames(oldPlant);
+      }
+      for (var lcName in localNames) {
+        //
+        var configLCN = PlantLocalNameModel(
+          name: lcName,
+          plant_id: oldPlant.id,
+        );
+        var response = await ApiPlant.uploadLocalName(configLCN);
+
+        if (response.success == false || response.errors != null) {
+          Get.close(1);
+          failedModal(
+              title: 'Failed', subtitle: 'Failed to update local names');
+          return;
+        }
+
+        if (response.clientError ?? false) {
+          Get.close(1);
+          failedModal(title: 'Failed', subtitle: response.message!);
+          return;
+        }
+      }
+
+      //--------------------------------------------------------------
+      progressMessage.value = 'Updating images...';
+      response = await ApiPlant.uploadCover(oldPlant, coverImage.value!);
+
+      if (response.success == false || response.errors != null) {
+        Get.close(1);
+        failedModal(title: 'Failed', subtitle: 'Failed to update cover image');
+        return;
+      }
+
+      if (response.clientError ?? false) {
+        Get.close(1);
+        failedModal(title: 'Failed', subtitle: response.message!);
+        return;
+      }
+
+      //--------------------------------------------------------------
+
+      for (var image in otherImages) {
+        response = await ApiPlant.uploadImage(oldPlant, image);
+
+        if (response.success == false || response.errors != null) {
+          Get.close(1);
+          failedModal(title: 'Failed', subtitle: 'Failed to update image');
+          return;
+        }
+
+        if (response.clientError ?? false) {
+          Get.close(1);
+          failedModal(title: 'Failed', subtitle: response.message!);
+          return;
+        }
+      }
+
+      Get.close(1);
+      successModal(title: 'Success', subtitle: 'Plant updated successfully');
+    } catch (e) {
+      Get.close(1);
+      failedModal(title: 'Failed', subtitle: 'Failed to update plant');
+      printError(info: e.toString());
+    }
   }
 }

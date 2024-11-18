@@ -16,7 +16,7 @@ class RequestPlantModel {
   String? plantName;
   String? scientific_name;
   String? description;
-  List<ApiImageModel>? images;
+  List<ImageModel>? images;
   String? additional_info;
   String? status;
   bool? is_accepted;
@@ -51,9 +51,8 @@ class RequestPlantModel {
     description = json['description'];
     additional_info = json['additional_info'];
     status = json['status'];
-    images = json['images'] != null
-        ? ApiImageModel.listFromJson(json['images'])
-        : null;
+    images =
+        json['images'] != null ? ImageModel.fromJsonList(json['images']) : null;
     is_accepted = json['is_accepted'] == 1 ? true : false;
     request_by = json['request_by'] != null
         ? UserModel.fromJson(json['user_requestby'])

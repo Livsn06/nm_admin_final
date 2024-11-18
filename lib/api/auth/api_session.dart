@@ -11,7 +11,7 @@ class SessionApi {
 
   Future<SessionModel?> session(String token) async {
     String base = API_BASE.value;
-    String url = '$base/api/auth/session';
+    String url = '$base/api/v1/users/session';
     var headers = {
       'Accept': 'application/json',
       'ngrok-skip-browser-warning': 'true',
@@ -19,7 +19,7 @@ class SessionApi {
     };
 
     try {
-      var response = await http.get(
+      var response = await http.post(
         Uri.parse(url),
         headers: headers,
       );

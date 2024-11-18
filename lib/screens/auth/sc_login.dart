@@ -242,16 +242,16 @@ mixin LoginFormController {
       return;
     }
 
-    var credentials = LoginModel(
+    var user = UserModel(
       email: emailController.text,
       password: passwordController.text,
     );
 
-    showLoading('Authetication', 'Please wait...');
-    var response = await LoginApi.auth.login(credentials);
+    showLoading('Logging in', 'Please wait...');
+    var response = await LoginApi.auth.login(user);
     Get.close(1);
 
-    if (response == null) {
+    if (response.clientError ?? false) {
       showFailedDialog('Failed', 'Something went wrong!');
       return;
     }
@@ -263,21 +263,16 @@ mixin LoginFormController {
       return;
     }
 
-    if (response.success == true) {
+    if (response.success == true && response.data != null) {
       //
-      var adminUser = UserModel.fromJson(response.data!);
+      var admin = UserModel.fromJson(response.data!);
 
       //
       showLoading('Session', 'Please wait...');
-      SessionAccess.instance
-          .createSession(adminUser, response.token!)
-          .then((_) async {
-        Get.close(1);
-        showSuccessDialog('Success', 'Login successfully!');
-        resetForm();
-        html.window.location.reload();
-      });
-
+      print(response.token);
+      await SessionAccess.instance.createSession(admin, response.token!);
+      Get.close(1);
+      html.window.location.reload();
       //
     }
   }

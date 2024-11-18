@@ -1,12 +1,17 @@
 import 'dart:typed_data';
 
+import 'package:admin/api/remedy/api_remedy.dart';
 import 'package:admin/controllers/ct_plant.dart';
 import 'package:admin/models/form/md_form_image.dart';
+import 'package:admin/models/plant/md_plant.dart';
 import 'package:admin/models/remedies/md_ailment.dart';
 import 'package:admin/models/remedies/md_ingredient.dart';
+import 'package:admin/models/remedies/md_remedy.dart';
 import 'package:admin/models/remedies/md_step.dart';
 import 'package:admin/models/remedies/md_usage.dart';
+import 'package:admin/models/user/md_user.dart';
 import 'package:admin/routes/rt_routers.dart';
+import 'package:admin/sessions/sn_access.dart';
 import 'package:admin/widgets/wg_appbar.dart';
 import 'package:admin/widgets/wg_dropdown.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
@@ -15,6 +20,8 @@ import 'package:gap/gap.dart';
 import 'dart:html' as html;
 
 import 'package:get/get.dart';
+
+import '../../api/image/api_image.dart';
 
 class RemedyCreateScreen extends StatefulWidget with FormFunctionality {
   RemedyCreateScreen({super.key});
@@ -31,7 +38,7 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
         context,
         title: 'Create Remedy',
         onBackTap: () {
-          Get.offNamed(CustomRoute.path.plantsTable);
+          widget.cancelModalWarning();
         },
       ),
       body: SingleChildScrollView(
@@ -101,7 +108,7 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
             Colors.red,
             title: 'Cancel',
             onTap: () {
-              Get.offNamed(CustomRoute.path.remediesTable);
+              widget.cancelModalWarning();
             },
           ),
           const Gap(30),
@@ -109,7 +116,7 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
             const Color(0xFF007E62),
             title: 'Submit',
             onTap: () {
-              widget.submitForm();
+              widget.uploadlModalWarning();
             },
           ),
         ],
@@ -141,7 +148,7 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
                               onAdd: () {
                                 widget.ingredients.add(
                                   IngredientModel(
-                                    title: widget.modalTitleController.text,
+                                    name: widget.modalTitleController.text,
                                     description:
                                         widget.modalDescriptionController.text,
                                   ),
@@ -193,7 +200,7 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
                       widget.ingredients.remove(ingredient);
                     });
                   },
-                  label: Text('${ingredient.title}'),
+                  label: Text('${ingredient.name}'),
                 );
               },
             ),
@@ -486,14 +493,24 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
               return GridView.builder(
                 shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
-                itemCount: widget.otherImages.value.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                itemCount: widget.otherImages.value.isEmpty
+                    ? 1
+                    : widget.otherImages.value.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 1,
                   crossAxisSpacing: 5,
                   mainAxisSpacing: 10,
-                  childAspectRatio: 2 / 6,
+                  childAspectRatio:
+                      widget.otherImages.value.isEmpty ? 1 / 8 : 2 / 6,
                 ),
                 itemBuilder: (context, index) {
+                  if (widget.otherImages.value.isEmpty) {
+                    return const Text(
+                      'No images added yet.',
+                      style: TextStyle(color: Colors.grey),
+                    );
+                  }
+
                   var image = widget.otherImages.value[index];
                   return InkWell(
                     onTap: () {
@@ -644,8 +661,12 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
                               label: 'Scientific Name',
                               isReadOnly: true,
                               controller: TextEditingController(
-                                  text: widget.plantDropdownController.value
-                                          .dropDownValue?.value.scientific ??
+                                  text: widget
+                                          .plantDropdownController
+                                          .value
+                                          .dropDownValue
+                                          ?.value
+                                          .scientific_name ??
                                       ''),
                             ),
                           ],
@@ -672,12 +693,8 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
                               child: widget.plantDropdownController.value
                                           .dropDownValue !=
                                       null
-                                  ? Text(
-                                      '${widget.plantDropdownController.value.dropDownValue!.value.name}')
-                                  // Image.memory(
-                                  //     widget.coverImage!.bytes!,
-                                  //     fit: BoxFit.cover,
-                                  //   )
+                                  ? _loadingImage(widget.plantDropdownController
+                                      .value.dropDownValue!.value.cover)
                                   : const Icon(
                                       Icons.image,
                                       size: 120,
@@ -695,6 +712,26 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _loadingImage(path) {
+    return FutureBuilder(
+      future: ApiImage.getImage(path),
+      builder: (context, snapshot) {
+        if (snapshot.hasError || !snapshot.hasData) {
+          return Image.asset('assets/placeholder/plant_image1.jpg');
+        }
+        if (snapshot.hasData) {
+          var data = snapshot.data;
+          return Image.memory(
+            data!.image_data!,
+            fit: BoxFit.cover,
+          );
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
     );
   }
 
@@ -1102,22 +1139,400 @@ mixin FormFunctionality {
       );
       return false;
     }
+
+    if (nameController.text.trim() == '' &&
+        typeController.text == '' &&
+        descriptionController.text == '') {
+      //
+      Get.snackbar(
+        margin: const EdgeInsets.all(10),
+        duration: const Duration(milliseconds: 2000),
+        'Error',
+        'Please fill all required form.',
+        backgroundColor: const Color(0xFFFFD4D4),
+        colorText: Colors.black,
+      );
+      return false;
+    }
     return true;
   }
 
-  void submitForm() {
+  void resetForm() {
+    nameController.clear();
+    typeController.clear();
+    descriptionController.clear();
+    otherImages.clear();
+    steps.clear();
+    ingredients.clear();
+    ailments.clear();
+    usages.clear();
+
+    modalTitleController.clear();
+    modalDescriptionController.clear();
+    coverImage.value = null;
+    otherImages.clear();
+    ailments.clear();
+    html.window.location.reload();
+  }
+
+  void cancelModalWarning() {
+    if (nameController.text.isEmpty &&
+        typeController.text.isEmpty &&
+        descriptionController.text.isEmpty &&
+        coverImage.value == null &&
+        otherImages.value.isEmpty &&
+        ailments.isEmpty &&
+        usages.isEmpty &&
+        steps.isEmpty &&
+        usages.isEmpty &&
+        plantDropdownController.value.dropDownValue == null) {
+      Get.offNamed(CustomRoute.path.remediesTable);
+      return;
+    }
+
+    Get.defaultDialog(
+      barrierDismissible: false,
+      titlePadding: const EdgeInsets.all(10),
+      contentPadding: const EdgeInsets.all(20),
+      title: 'Cancel',
+      content: RichText(
+        textAlign: TextAlign.center,
+        text: const TextSpan(
+          style: TextStyle(color: Colors.black, fontSize: 16),
+          children: [
+            TextSpan(
+              text: 'Are you sure you? \n\n',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextSpan(
+              text: 'All unsaved changes will be lost.',
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        MaterialButton(
+          color: const Color(0xFF007E62),
+          textColor: Colors.white,
+          onPressed: () {
+            Get.close(1);
+          },
+          child: const Text('No'),
+        ),
+        MaterialButton(
+          color: Colors.red,
+          textColor: Colors.white,
+          onPressed: () {
+            Get.offNamed(CustomRoute.path.remediesTable);
+          },
+          child: const Text('Yes'),
+        ),
+      ],
+    );
+  }
+
+  void uploadlModalWarning() {
+    if (!formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (coverImage.value == null) {
+      Get.snackbar(
+        padding: const EdgeInsets.all(10),
+        'Cover',
+        'Please select an cover image.',
+        backgroundColor: const Color(0xFFFFD4D4),
+        colorText: Colors.black,
+      );
+      return;
+    }
+
+    if (otherImages.isEmpty) {
+      Get.snackbar(
+        padding: const EdgeInsets.all(10),
+        'Images',
+        'Please select at least one image.',
+        backgroundColor: const Color(0xFFFFD4D4),
+        colorText: Colors.black,
+      );
+      return;
+    }
+
+    if (ailments.isEmpty) {
+      Get.snackbar(
+        padding: const EdgeInsets.all(10),
+        'Ailment',
+        'Please add at least one ailment associated.',
+        backgroundColor: const Color(0xFFFFD4D4),
+        colorText: Colors.black,
+      );
+      return;
+    }
+
+    if (steps.isEmpty) {
+      Get.snackbar(
+        padding: const EdgeInsets.all(10),
+        'Steps',
+        'Please add at least one steps.',
+        backgroundColor: const Color(0xFFFFD4D4),
+        colorText: Colors.black,
+      );
+      return;
+    }
+
+    if (usages.isEmpty) {
+      Get.snackbar(
+        padding: const EdgeInsets.all(10),
+        'Usages',
+        'Please add at least one usages.',
+        backgroundColor: const Color(0xFFFFD4D4),
+        colorText: Colors.black,
+      );
+      return;
+    }
+    if (ingredients.isEmpty) {
+      Get.snackbar(
+        padding: const EdgeInsets.all(10),
+        'Ingredient',
+        'Please add at least one ingredient.',
+        backgroundColor: const Color(0xFFFFD4D4),
+        colorText: Colors.black,
+      );
+      return;
+    }
+
+    Get.defaultDialog(
+      barrierDismissible: false,
+      titlePadding: const EdgeInsets.all(10),
+      contentPadding: const EdgeInsets.all(20),
+      title: 'Upload',
+      content: RichText(
+        textAlign: TextAlign.center,
+        text: const TextSpan(
+          style: TextStyle(color: Colors.black, fontSize: 16),
+          children: [
+            TextSpan(
+              text: 'Proceed with upload? \n\n',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextSpan(
+              text: 'You are about to upload a new remedy.',
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        MaterialButton(
+          color: Colors.red,
+          textColor: Colors.white,
+          onPressed: () {
+            Get.close(1);
+          },
+          child: const Text('Wait'),
+        ),
+        MaterialButton(
+          color: const Color(0xFF007E62),
+          textColor: Colors.white,
+          onPressed: () {
+            Get.close(1);
+            submitForm();
+          },
+          child: const Text('Proceed'),
+        ),
+      ],
+    );
+  }
+
+  void loadingModal({title, subtitle}) {
+    Get.defaultDialog(
+      barrierDismissible: false,
+      titlePadding: const EdgeInsets.all(10),
+      contentPadding: const EdgeInsets.all(20),
+      title: '$title',
+      content: SizedBox(
+        width: 230,
+        height: 150,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text('$subtitle'),
+            const Gap(15),
+            const CircularProgressIndicator(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void failedModal({title, subtitle}) {
+    Get.defaultDialog(
+        barrierDismissible: false,
+        titlePadding: const EdgeInsets.all(10),
+        contentPadding: const EdgeInsets.all(20),
+        title: '$title',
+        content: Text('$subtitle'),
+        actions: [
+          MaterialButton(
+            color: Colors.red,
+            textColor: Colors.white,
+            onPressed: () {
+              Get.close(1);
+            },
+            child: const Text('Ok'),
+          ),
+        ]);
+  }
+
+  void successModal({title, subtitle}) {
+    Get.defaultDialog(
+        barrierDismissible: false,
+        titlePadding: const EdgeInsets.all(10),
+        contentPadding: const EdgeInsets.all(20),
+        title: '$title',
+        content: Text('$subtitle'),
+        actions: [
+          MaterialButton(
+            color: const Color(0xFF007E62),
+            textColor: Colors.white,
+            onPressed: () {
+              Get.close(1);
+              resetForm();
+            },
+            child: const Text('Ok'),
+          ),
+        ]);
+  }
+
+  // =============================
+
+  void submitForm() async {
     if (!isValidPlant()) {
       return;
     }
     //FOR PLANT
 
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
-
-    if (!isValidRemedyForm()) {
-      return;
-    }
     //FOR REMEDY
+    // if (!isValidRemedyForm()) {
+    //   formKey.currentState!.validate();
+    //   return;
+    // }
+
+    // var name = GetUtils.capitalizeFirst(nameController.text.trim());
+    // var type = GetUtils.capitalizeFirst(typeController.text.trim());
+    // var description =
+    //     GetUtils.capitalizeFirst(descriptionController.text.trim());
+
+    // loadingModal(title: 'Uploading', subtitle: 'Please wait...');
+
+    // UserModel user = await SessionAccess.instance.getSessionData();
+
+    // PlantModel plantSelected =
+    //     plantDropdownController.value.dropDownValue!.value;
+
+    // var remedy = RemedyModel(
+    //   name: name,
+    //   description: description,
+    //   plant: plantSelected,
+    //   user_create_by: user,
+    //   user_update_by: user,
+    // );
+
+    // var cover = coverImage.value;
+
+    // var remedyResult =
+    //     await ApiRemedy.uploadRemedy(remedy: remedy, cover: cover!);
+
+    // if (remedyResult == null) {
+    //   Get.close(1);
+    //   failedModal(title: 'Failed', subtitle: 'Remedy failed to upload.');
+    //   return;
+    // }
+
+    // var newRemedy = RemedyModel(id: remedyResult.id, name: remedyResult.name);
+
+    // for (var ailment in ailments) {
+    //   var withIdAilment = AilmentModel(
+    //     name: ailment.name,
+    //     description: ailment.description,
+    //     remedy_id: newRemedy.id,
+    //   );
+
+    //   var remedyAilment = await ApiRemedy.uploadRemedyAilment(withIdAilment);
+
+    //   if (remedyAilment == null) {
+    //     Get.close(1);
+    //     failedModal(
+    //         title: 'Failed', subtitle: 'Remedy Ailments failed to upload.');
+    //     return;
+    //   }
+    // }
+
+    // for (var step in steps) {
+    //   var withIdStep = StepModel(
+    //     name: step.name,
+    //     description: step.description,
+    //     remedy_id: newRemedy.id,
+    //   );
+
+    //   var remedyStep = await ApiRemedy.uploadRemedySteps(withIdStep);
+
+    //   if (remedyStep == null) {
+    //     Get.close(1);
+    //     failedModal(
+    //         title: 'Failed', subtitle: 'Remedy Steps failed to upload.');
+    //     return;
+    //   }
+    // }
+
+    // for (var usage in usages) {
+    //   var withIdUsage = UsageModel(
+    //     name: usage.name,
+    //     description: usage.description,
+    //     remedy_id: newRemedy.id,
+    //   );
+
+    //   var remedyUsage = await ApiRemedy.uploadRemedyUsage(withIdUsage);
+
+    //   if (remedyUsage == null) {
+    //     Get.close(1);
+    //     failedModal(
+    //         title: 'Failed', subtitle: 'Remedy Usages failed to upload.');
+    //     return;
+    //   }
+    // }
+
+    // //
+    // for (var ingredient in ingredients) {
+    //   var withIdIngredient = IngredientModel(
+    //     name: ingredient.name,
+    //     description: ingredient.description,
+    //     remedy_id: newRemedy.id,
+    //   );
+
+    //   var remedyIngredient =
+    //       await ApiRemedy.uploadRemedyIngredient(withIdIngredient);
+
+    //   if (remedyIngredient == null) {
+    //     Get.close(1);
+    //     failedModal(
+    //         title: 'Failed', subtitle: 'Remedy Ingredients failed to upload.');
+    //     return;
+    //   }
+    // }
+
+    // //
+    // for (var image in otherImages.value) {
+    //   var remedyImage = await ApiRemedy.uploadRemedyImage(newRemedy, image);
+
+    //   if (remedyImage == null) {
+    //     Get.close(1);
+    //     failedModal(
+    //         title: 'Failed', subtitle: 'Remedy images failed to upload.');
+    //     return;
+    //   }
+    // }
+
+    // successModal(title: 'Uploaded', subtitle: 'Remedy Uploaded success');
   }
 }

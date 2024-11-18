@@ -40,11 +40,12 @@ class AilmentModel {
   }
 
   AilmentModel.fromRemedyJson(Map<String, dynamic> json) {
-    id = json['id'];
+    id = json['id'] != null ? int.parse(json['id'].toString()) : 0;
     name = json['name'];
     type = json['type'];
     description = json['description'];
-    remedy_id = json['remedy_id'];
+    remedy_id =
+        json['remedy_id'] != null ? int.parse(json['remedy_id'].toString()) : 0;
     created_at = json['created_at'];
     updated_at = json['updated_at'];
   }
@@ -72,7 +73,7 @@ class AilmentModel {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['name'] = name;
     data['description'] = description;
-    data['remedy_id'] = plant_id.toString();
+    data['remedy_id'] = remedy_id.toString();
 
     return data;
   }

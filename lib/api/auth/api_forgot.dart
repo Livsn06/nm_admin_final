@@ -30,7 +30,7 @@ class ForgotPasswordApi {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         log('Searching Email successful', name: 'API SEARCH EMAIL');
-        return ResponseModel.fromEmailOnlyJson(data, success: true);
+        // return ResponseModel.fromEmailOnlyJson(data, success: true);
       }
 
       if (response.statusCode == 422) {

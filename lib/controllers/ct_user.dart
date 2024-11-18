@@ -1,4 +1,4 @@
-import 'package:admin/api/user/api_user_get.dart';
+import 'package:admin/api/user/api_user.dart';
 import 'package:admin/models/user/md_user.dart';
 import 'package:get/get.dart';
 
@@ -35,17 +35,17 @@ mixin DataSourceApi {
 
     //
     isLoading.value = true;
-    var value = await ApiUser.fetchAllUser();
+    var response = await ApiUser.fetchAllUser();
 
-    if (value == null) {
-      isLoading.value = false;
-      isError.value = true;
-    } else {
+    if (response.success && response.dataList != null) {
       isLoading.value = false;
       isError.value = false;
+      return UserModel.listFromJson(response.dataList!);
+    } else {
+      isLoading.value = false;
+      isError.value = true;
+      return null;
     }
-
-    return value;
   }
 
   Future<List<UserModel>?> getApiDataByRole(String role) async {
@@ -53,17 +53,17 @@ mixin DataSourceApi {
 
     isLoading.value = true;
 
-    var value = await ApiUser.fetchRoleUser(role);
+    var response = await ApiUser.fetchRoleUser(role);
 
-    if (value == null) {
-      isLoading.value = false;
-      isError.value = true;
-    } else {
+    if (response.success && response.dataList != null) {
       isLoading.value = false;
       isError.value = false;
+      return UserModel.listFromJson(response.dataList!);
+    } else {
+      isLoading.value = false;
+      isError.value = true;
+      return null;
     }
-
-    return value;
   }
 
   void stateReset() {

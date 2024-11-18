@@ -14,8 +14,14 @@ class SessionMiddleware extends GetMiddleware {
   RouteSettings? redirect(String? route) {
     checkSession.then((value) {
       SESSION.value = value;
-      if (value) {
-        Get.snackbar('Hello', 'Redirecting to dashboard...');
+      if (value &&
+          [
+            RouteSetting.login.name,
+            RouteSetting.root.name,
+            RouteSetting.landing.name,
+            RouteSetting.signup.name,
+          ].contains(route)) {
+        Get.snackbar('Login Success', 'Redirected to dashboard...');
         Get.offAllNamed(CustomRoute.path.dashboard);
         return null;
       } else {

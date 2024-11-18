@@ -12,8 +12,13 @@ class AuthMiddleware extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
     checkSession.then((value) {
-      print(value);
-      if (!value && route == CustomRoute.path.dashboard) {
+      if (!value &&
+          ![
+            RouteSetting.login.name,
+            RouteSetting.root.name,
+            RouteSetting.landing.name,
+            RouteSetting.signup.name,
+          ].contains(route)) {
         Get.snackbar('Authentication', 'You need to login first!');
         Get.toNamed(CustomRoute.path.login, preventDuplicates: true);
         return null;
