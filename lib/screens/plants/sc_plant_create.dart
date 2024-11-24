@@ -1398,6 +1398,11 @@ mixin FormFuntionality {
 
       //--------------------------------------------------------------
       progressMessage.value = 'Updating images...';
+
+      if (otherImages.value.isNotEmpty) {
+        await ApiPlant.clearImages(oldPlant);
+      }
+
       response = await ApiPlant.uploadCover(oldPlant, coverImage.value!);
 
       if (response.success == false || response.errors != null) {
