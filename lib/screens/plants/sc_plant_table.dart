@@ -22,7 +22,7 @@ class PlantTableScreen extends StatefulWidget with OtherFunctionality {
 
 class _PlantTableScreenState extends State<PlantTableScreen> {
   var plantController = Get.put(PlantController());
-
+  var searchTextController = TextEditingController();
   //
   @override
   Widget build(BuildContext context) {
@@ -101,7 +101,7 @@ class _PlantTableScreenState extends State<PlantTableScreen> {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               TextField(
-                controller: TextEditingController(),
+                controller: searchTextController,
                 style: const TextStyle(color: Colors.black, fontSize: 16),
                 decoration: InputDecoration(
                   labelText: 'Search',
@@ -112,6 +112,10 @@ class _PlantTableScreenState extends State<PlantTableScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
+                onChanged: (value) {
+                  plantController.plantData.value =
+                      plantController.filterByPlantName(value);
+                },
               ),
               MaterialButton(
                 color: const Color(0xFF007E62),

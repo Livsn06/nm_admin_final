@@ -8,73 +8,43 @@
 //                     "updated_at": "2024-10-31T10:19:00.000000Z"
 //                 },
 
-class AilmentModel {
+class RemedyTreatmentModel {
   int? id;
   String? name;
-  String? type;
   String? description;
   int? remedy_id;
   int? plant_id;
   String? created_at;
   String? updated_at;
 
-  AilmentModel({
+  RemedyTreatmentModel({
     this.id,
     this.name,
-    this.type,
     this.description,
     this.remedy_id,
-    this.plant_id,
     this.created_at,
     this.updated_at,
   });
 
-  static List<AilmentModel> fromPlantJsonList(List<dynamic> jsonList) {
+  static List<RemedyTreatmentModel> fromJsonList(List<dynamic> jsonList) {
     if (jsonList.isEmpty) return [];
-    return jsonList.map((json) => AilmentModel.fromPlantJson(json)).toList();
+    return jsonList.map((item) => RemedyTreatmentModel.fromJson(item)).toList();
   }
 
-  static List<AilmentModel> fromRemedyJsonList(List<dynamic> jsonList) {
-    if (jsonList.isEmpty) return [];
-    return jsonList.map((json) => AilmentModel.fromRemedyJson(json)).toList();
-  }
-
-  AilmentModel.fromRemedyJson(Map<String, dynamic> json) {
-    id = json['id'] != null ? int.parse(json['id'].toString()) : 0;
+  RemedyTreatmentModel.fromJson(Map<String, dynamic> json) {
+    id = int.tryParse(json['id'].toString());
     name = json['name'];
-    type = json['type'];
     description = json['description'];
-    remedy_id =
-        json['remedy_id'] != null ? int.parse(json['remedy_id'].toString()) : 0;
-    created_at = json['created_at'];
-    updated_at = json['updated_at'];
-  }
-  AilmentModel.fromPlantJson(Map<String, dynamic> json) {
-    id = json['id'] != null ? int.parse(json['id'].toString()) : 0;
-    name = json['name'];
-    type = json['type'];
-    description = json['description'];
-    plant_id =
-        json['plant_id'] != null ? int.parse(json['plant_id'].toString()) : 0;
+    remedy_id = int.tryParse(json['remedy_id'].toString());
     created_at = json['created_at'];
     updated_at = json['updated_at'];
   }
 
-  Map<String, dynamic> toPlantJson() {
+  Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['name'] = name;
-    data['description'] = description;
-    data['plant_id'] = plant_id.toString();
-
-    return data;
-  }
-
-  Map<String, dynamic> toRemedyJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['name'] = name;
-    data['description'] = description;
+    data['name'] = name.toString();
+    data['description'] = description.toString();
     data['remedy_id'] = remedy_id.toString();
-
     return data;
   }
 }

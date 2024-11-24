@@ -1,124 +1,155 @@
-import 'package:admin/models/image/md_image.dart';
+import 'package:admin/models/plant/md_plant.dart';
 import 'package:admin/models/remedies/md_ailment.dart';
+import 'package:admin/models/remedies/md_image.dart';
 import 'package:admin/models/remedies/md_step.dart';
 import 'package:admin/models/remedies/md_usage.dart';
 import 'package:admin/models/remedies/md_ingredient.dart';
 import 'package:admin/models/user/md_user.dart';
 
-import '../plant/md_plant.dart';
-
-// {
-//     "id": 1,
-//     "name": "Herbal Decoction",
-//     "description": "A decoction made from Kugon roots helps alleviate diarrhea by soothing the digestive system and reducing inflammation",
-//     "treatment": "Diarrhea",
-//     "status": "Active",
-//     "usage": null,
-//     "side_effect": null,
-//     "ingredient": null,
-//     "rating": 0,
-//     "cover": null,
-//     "update_id": null,
-//     "create_id": 2,
-//     "plant_id": 1,
-//     "created_at": "2024-11-13T08:06:35.000000Z",
-//     "updated_at": "2024-11-13T08:06:35.000000Z"
-// },
+// 'name',
+//   'description',
+//   'status',
+//   'rating',
+//   'side_effect',
+//   'plant_id',
+//   'update_id',
+//   'create_id',
 
 class RemedyModel {
   int? id;
   String? name;
+  String? type;
   String? description;
   String? status;
+  int? rating;
+  String? side_effect;
+  int? plant_id;
   PlantModel? plant;
-  double? rating;
-  String? effect;
+  UserModel? update_by;
+  UserModel? create_by;
   String? cover;
-  List<AilmentModel>? treatment;
-  List<UsageModel>? usage;
+  List<RemedyTreatmentModel>? treatments;
+  List<UsageModel>? usages;
   List<StepModel>? steps;
-  List<ImageModel>? images;
   List<IngredientModel>? ingredients;
-  UserModel? user_create_by;
-  UserModel? user_update_by;
-  String? created_at;
-  String? updated_at;
+  List<RemedyImageModel>? images;
 
   RemedyModel({
     this.id,
     this.name,
+    this.type,
     this.description,
     this.status,
-    this.plant,
     this.rating,
-    this.effect,
+    this.side_effect,
+    this.plant_id,
+    this.plant,
+    this.update_by,
+    this.create_by,
     this.cover,
-    this.treatment,
-    this.usage,
+    this.treatments,
+    this.usages,
     this.steps,
-    this.images,
     this.ingredients,
-    this.user_create_by,
-    this.user_update_by,
-    this.created_at,
-    this.updated_at,
+    this.images,
   });
 
-  static List<RemedyModel> fromJsonList(List<dynamic> list) {
+  static List<RemedyModel> fromJsonList(List list) {
     if (list.isEmpty) return [];
     return list.map((item) => RemedyModel.fromJson(item)).toList();
   }
 
   RemedyModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'] != null ? int.parse(json['id'].toString()) : null;
-    name = json['name'];
-    description = json['description'];
-    status = json['status'];
-    plant = json['plant'] != null ? PlantModel.fromJson(json['plant']) : null;
-    rating =
-        json['rating'] != null ? double.parse(json['rating'].toString()) : null;
-    effect = json['effect'];
-    cover = json['cover'];
-    treatment = json['ailments'] != null
-        ? AilmentModel.fromRemedyJsonList(json['ailments'])
+    id = int.tryParse(json['id'].toString());
+    name = json['name'] ?? '';
+    type = json['type'] ?? '';
+    description = json['description'] ?? '';
+    status = json['status'] ?? '';
+    rating = int.tryParse(json['rating'].toString());
+    plant_id = int.tryParse(json['plant_id'].toString());
+    update_by = json['update_by'] != null
+        ? UserModel.fromJson(json['update_by'])
         : null;
-    usage =
-        json['usages'] != null ? UsageModel.fromJsonList(json['usages']) : null;
-    steps =
-        json['steps'] != null ? StepModel.fromJsonList(json['steps']) : null;
-    images =
-        json['images'] != null ? ImageModel.fromJsonList(json['images']) : null;
+    create_by = json['create_by'] != null
+        ? UserModel.fromJson(json['create_by'])
+        : null;
+
+    treatments = json['treatments'] != null
+        ? RemedyTreatmentModel.fromJsonList(json['treatments'] ?? [])
+        : null;
+    usages = json['usages'] != null
+        ? UsageModel.fromJsonList(json['usages'] ?? [])
+        : null;
+    steps = json['steps'] != null
+        ? StepModel.fromJsonList(json['steps'] ?? [])
+        : null;
     ingredients = json['ingredients'] != null
-        ? IngredientModel.fromJsonList(json['ingredients'])
+        ? IngredientModel.fromJsonList(json['ingredients'] ?? [])
         : null;
-    user_create_by = json['user_create_by'] != null
-        ? UserModel.fromJson(json['user_create_by'])
+    cover = json['cover'];
+    images = json['images'] != null
+        ? RemedyImageModel.listFromJson(json['images'])
         : null;
-    user_update_by = json['user_update_by'] != null
-        ? UserModel.fromJson(json['user_update_by'])
-        : null;
-    created_at = json['created_at'];
-    updated_at = json['updated_at'];
   }
 
-  Map<String, String> toJson() {
-    final Map<String, String> data = <String, String>{};
-    data['id'] = id.toString();
-    data['name'] = name.toString();
-    data['description'] = description.toString();
-    data['status'] = status.toString();
-    data['plant_id'] = plant!.id.toString();
-    data['rating'] = rating.toString();
-    data['effect'] = effect.toString();
-    data['cover'] = cover.toString();
+  RemedyModel.fromJsonWithPlant(Map<String, dynamic> json) {
+    id = int.tryParse(json['id'].toString());
+    name = json['name'] ?? '';
+    type = json['type'] ?? '';
+    description = json['description'] ?? '';
+    status = json['status'] ?? '';
+    rating = int.tryParse(json['rating'].toString());
+    plant_id = int.tryParse(json['plant_id'].toString());
+    update_by = json['update_by'] != null
+        ? UserModel.fromJson(json['update_by'])
+        : null;
+    create_by = json['create_by'] != null
+        ? UserModel.fromJson(json['create_by'])
+        : null;
 
-    if (user_create_by != null) {
-      data['created_by'] = user_create_by!.id.toString();
-    }
-    if (user_update_by != null) {
-      data['updated_by'] = user_update_by!.id.toString();
-    }
+    treatments = json['treatments'] != null
+        ? RemedyTreatmentModel.fromJsonList(json['treatments'] ?? [])
+        : null;
+    usages = json['usages'] != null
+        ? UsageModel.fromJsonList(json['usages'] ?? [])
+        : null;
+    steps = json['steps'] != null
+        ? StepModel.fromJsonList(json['steps'] ?? [])
+        : null;
+    ingredients = json['ingredients'] != null
+        ? IngredientModel.fromJsonList(json['ingredients'] ?? [])
+        : null;
+    plant = json['plant'] != null ? PlantModel.fromJson(json['plant']) : null;
+    cover = json['cover'];
+    images = json['images'] != null
+        ? RemedyImageModel.listFromJson(json['images'])
+        : null;
+  }
+  Map<String, dynamic> toCreateRemedyJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['name'] = name;
+    data['type'] = type;
+    data['description'] = description;
+    data['status'] = 'Inactive';
+    data['plant_id'] = plant_id.toString();
+    data['create_id'] = create_by!.id.toString();
+    return data;
+  }
 
+  Map<String, dynamic> toUpdateRemedyJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['name'] = name;
+    data['type'] = type;
+    data['description'] = description;
+    data['plant_id'] = plant_id.toString();
+    data['update_id'] = update_by!.id.toString();
+    data['create_id'] = create_by!.id.toString();
+    return data;
+  }
+
+  Map<String, dynamic> toUpdateStatusJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
     return data;
   }
 }

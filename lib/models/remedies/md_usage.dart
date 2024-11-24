@@ -12,7 +12,6 @@ import 'package:admin/models/remedies/md_remedy.dart';
 class UsageModel {
   int? id;
   String? name;
-  String? type;
   String? description;
   int? remedy_id;
   String? created_at;
@@ -21,7 +20,6 @@ class UsageModel {
   UsageModel({
     this.id,
     this.name,
-    this.type,
     this.description,
     this.remedy_id,
     this.created_at,
@@ -34,18 +32,16 @@ class UsageModel {
   }
 
   UsageModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'] != null ? int.parse(json['id'].toString()) : 0;
+    id = int.tryParse(json['id'].toString());
     name = json['name'];
-    type = json['type'];
     description = json['description'];
-    remedy_id = json['remedy_id'] == null ? 0 : int.parse(json['remedy_id']);
+    remedy_id = int.tryParse(json['remedy_id'].toString());
     created_at = json['created_at'];
     updated_at = json['updated_at'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id.toString();
     data['name'] = name;
     data['description'] = description;
     data['remedy_id'] = remedy_id.toString();

@@ -13,6 +13,7 @@ class RemedyController extends GetxController with DataSourceApi {
   }
 
   final RxList<RemedyModel> remedyData = RxList<RemedyModel>([]);
+  final RxList<RemedyModel> remedyBackupData = RxList<RemedyModel>([]);
   final RxList<RemedyModel> remedyActiveData = RxList<RemedyModel>([]);
 
   //FUNCTIONS
@@ -22,8 +23,17 @@ class RemedyController extends GetxController with DataSourceApi {
         .toList();
   }
 
+  List<RemedyModel> filterByPlantName(String name) {
+    if (name.trim().isEmpty) return remedyBackupData.value;
+
+    return remedyBackupData.value
+        .where((remedy) =>
+            remedy.name!.trim().isCaseInsensitiveContains(name.trim()))
+        .toList();
+  }
+
   void loadAllData() async {
-    remedyData.value = await plantApiData() ?? [];
+    remedyBackupData.value = remedyData.value = await plantApiData() ?? [];
     remedyActiveData.value = filterByStatus('Active');
   }
 }
@@ -37,7 +47,7 @@ mixin DataSourceApi {
 
     //
     isLoading.value = true;
-    var response = await ApiRemedy.fetchAllRemedy();
+    var response = await ApiRemedy.fetchAllRemedies();
 
     if (response.success && response.dataList != null) {
       isLoading.value = false;

@@ -7,9 +7,6 @@
 //                     "updated_at": "2024-10-31T10:19:00.000000Z"
 //                 },
 
-import 'package:admin/controllers/ct_remedy.dart';
-import 'package:admin/models/remedies/md_remedy.dart';
-
 class StepModel {
   int? id;
   String? name;
@@ -27,15 +24,15 @@ class StepModel {
     this.updated_at,
   });
 
-  static List<StepModel> fromJsonList(List<dynamic> list) {
+  static List<StepModel> fromJsonList(List list) {
     if (list.isEmpty) return [];
     return list.map((item) => StepModel.fromJson(item)).toList();
   }
 
   StepModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'] != null ? int.parse(json['id'].toString()) : 0;
+    id = int.tryParse(json['id'].toString());
     name = json['name'];
-    remedy_id = json['remedy_id'] == null ? int.parse(json['remedy_id']) : 0;
+    remedy_id = int.tryParse(json['remedy_id'].toString());
     description = json['description'];
     created_at = json['created_at'];
     updated_at = json['updated_at'];
@@ -43,7 +40,6 @@ class StepModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id.toString();
     data['name'] = name;
     data['remedy_id'] = remedy_id.toString();
     data['description'] = description;

@@ -11,6 +11,7 @@ class PlantController extends GetxController with DataSourceApi {
   }
 
   final RxList<PlantModel> plantData = RxList<PlantModel>([]);
+  final RxList<PlantModel> plantBackupData = RxList<PlantModel>([]);
   final RxList<PlantModel> plantActive = RxList<PlantModel>([]);
 
   //FUNCTIONS
@@ -20,9 +21,17 @@ class PlantController extends GetxController with DataSourceApi {
         .toList();
   }
 
-  void loadPlantData() async {
-    plantData.value = await plantApiData() ?? [];
+  List<PlantModel> filterByPlantName(String name) {
+    if (name.trim().isEmpty) return plantBackupData.value;
 
+    return plantBackupData.value
+        .where((plant) =>
+            plant.name!.trim().isCaseInsensitiveContains(name.trim()))
+        .toList();
+  }
+
+  void loadPlantData() async {
+    plantBackupData.value = plantData.value = await plantApiData() ?? [];
     plantActive.value = filterByStatus('Active');
   }
 }

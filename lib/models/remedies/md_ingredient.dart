@@ -27,26 +27,23 @@ class IngredientModel {
 
   static List<IngredientModel> fromJsonList(List<dynamic> jsonList) {
     if (jsonList.isEmpty) return [];
-
     return jsonList.map((item) => IngredientModel.fromJson(item)).toList();
-  }
-
-  IngredientModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'] == null ? 0 : int.parse(json['id'].toString());
-    name = json['name'];
-    description = json['description'];
-    remedy_id =
-        json['remedy_id'] == null ? 0 : int.parse(json['remedy_id'].toString());
-    created_at = json['created_at'];
-    updated_at = json['updated_at'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id.toString();
     data['name'] = name;
     data['description'] = description;
     data['remedy_id'] = remedy_id.toString();
     return data;
+  }
+
+  IngredientModel.fromJson(Map<String, dynamic> json) {
+    id = int.tryParse(json['id'].toString());
+    name = json['name'];
+    description = json['description'];
+    remedy_id = int.tryParse(json['remedy_id'].toString());
+    created_at = json['created_at'];
+    updated_at = json['updated_at'];
   }
 }

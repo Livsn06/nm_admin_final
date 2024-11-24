@@ -9,9 +9,11 @@ import 'package:admin/models/remedies/md_ingredient.dart';
 import 'package:admin/models/remedies/md_remedy.dart';
 import 'package:admin/models/remedies/md_step.dart';
 import 'package:admin/models/remedies/md_usage.dart';
+import 'package:admin/models/response/md_response.dart';
 import 'package:admin/models/user/md_user.dart';
 import 'package:admin/routes/rt_routers.dart';
 import 'package:admin/sessions/sn_access.dart';
+import 'package:admin/sessions/sn_remedy.dart';
 import 'package:admin/widgets/wg_appbar.dart';
 import 'package:admin/widgets/wg_dropdown.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
@@ -32,11 +34,19 @@ class RemedyCreateScreen extends StatefulWidget with FormFunctionality {
 
 class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
   @override
+  void initState() {
+    super.initState();
+    widget.checkEditMode(() {
+      setState(() {});
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: customAppBar(
         context,
-        title: 'Create Remedy',
+        title: widget.isEditMode.value ? 'Edit Remedy' : 'Create Remedy',
         onBackTap: () {
           widget.cancelModalWarning();
         },
@@ -116,7 +126,11 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
             const Color(0xFF007E62),
             title: 'Submit',
             onTap: () {
-              widget.uploadlModalWarning();
+              if (widget.isEditMode.value) {
+                widget.updateModalWarning();
+              } else {
+                widget.uploadModalWarning();
+              }
             },
           ),
         ],
@@ -191,16 +205,42 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
 
                 final ingredient = widget.ingredients[index];
 
-                return Chip(
-                  padding: const EdgeInsets.all(10),
-                  deleteIcon: const Icon(Icons.clear),
-                  deleteIconColor: Colors.red,
-                  onDeleted: () {
-                    setState(() {
-                      widget.ingredients.remove(ingredient);
-                    });
+                return InkWell(
+                  onTap: () {
+                    widget.modalTitleController.text = ingredient.name!;
+                    widget.modalDescriptionController.text =
+                        ingredient.description!;
+                    _buildModalAdd(
+                      'Edit Usage',
+                      onCancel: () {
+                        Get.close(1);
+                        widget.modalDescriptionController.clear();
+                        widget.modalTitleController.clear();
+                      },
+                      onAdd: () {
+                        widget.ingredients[index] = IngredientModel(
+                          name: widget.modalTitleController.text,
+                          description: widget.modalDescriptionController.text,
+                        );
+                        setState(() {
+                          Get.close(1);
+                          widget.modalDescriptionController.clear();
+                          widget.modalTitleController.clear();
+                        });
+                      },
+                    );
                   },
-                  label: Text('${ingredient.name}'),
+                  child: Chip(
+                    padding: const EdgeInsets.all(10),
+                    deleteIcon: const Icon(Icons.clear),
+                    deleteIconColor: Colors.red,
+                    onDeleted: () {
+                      setState(() {
+                        widget.ingredients.remove(ingredient);
+                      });
+                    },
+                    label: Text('${ingredient.name}'),
+                  ),
                 );
               },
             ),
@@ -276,16 +316,41 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
 
                 //
                 final usage = widget.usages[index];
-                return Chip(
-                  padding: const EdgeInsets.all(10),
-                  deleteIcon: const Icon(Icons.clear),
-                  deleteIconColor: Colors.red,
-                  onDeleted: () {
-                    setState(() {
-                      widget.usages.remove(usage);
-                    });
+                return InkWell(
+                  onTap: () {
+                    widget.modalTitleController.text = usage.name!;
+                    widget.modalDescriptionController.text = usage.description!;
+                    _buildModalAdd(
+                      'Edit Usage',
+                      onCancel: () {
+                        Get.close(1);
+                        widget.modalDescriptionController.clear();
+                        widget.modalTitleController.clear();
+                      },
+                      onAdd: () {
+                        widget.usages[index] = UsageModel(
+                          name: widget.modalTitleController.text,
+                          description: widget.modalDescriptionController.text,
+                        );
+                        setState(() {
+                          Get.close(1);
+                          widget.modalDescriptionController.clear();
+                          widget.modalTitleController.clear();
+                        });
+                      },
+                    );
                   },
-                  label: Text('${usage.name}'),
+                  child: Chip(
+                    padding: const EdgeInsets.all(10),
+                    deleteIcon: const Icon(Icons.clear),
+                    deleteIconColor: Colors.red,
+                    onDeleted: () {
+                      setState(() {
+                        widget.usages.remove(usage);
+                      });
+                    },
+                    label: Text('${usage.name}'),
+                  ),
                 );
               },
             ),
@@ -360,16 +425,41 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
                 }
 
                 final step = widget.steps[index];
-                return Chip(
-                  padding: const EdgeInsets.all(10),
-                  deleteIcon: const Icon(Icons.clear),
-                  deleteIconColor: Colors.red,
-                  onDeleted: () {
-                    setState(() {
-                      widget.steps.remove(step);
-                    });
+                return InkWell(
+                  onTap: () {
+                    widget.modalTitleController.text = step.name!;
+                    widget.modalDescriptionController.text = step.description!;
+                    _buildModalAdd(
+                      'Edit Step',
+                      onCancel: () {
+                        Get.close(1);
+                        widget.modalDescriptionController.clear();
+                        widget.modalTitleController.clear();
+                      },
+                      onAdd: () {
+                        widget.steps[index] = StepModel(
+                          name: widget.modalTitleController.text,
+                          description: widget.modalDescriptionController.text,
+                        );
+                        setState(() {
+                          Get.close(1);
+                          widget.modalDescriptionController.clear();
+                          widget.modalTitleController.clear();
+                        });
+                      },
+                    );
                   },
-                  label: Text('${step.name}'),
+                  child: Chip(
+                    padding: const EdgeInsets.all(10),
+                    deleteIcon: const Icon(Icons.clear),
+                    deleteIconColor: Colors.red,
+                    onDeleted: () {
+                      setState(() {
+                        widget.steps.remove(step);
+                      });
+                    },
+                    label: Text('${step.name}'),
+                  ),
                 );
               },
             ),
@@ -402,7 +492,7 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
                               },
                               onAdd: () {
                                 widget.ailments.add(
-                                  AilmentModel(
+                                  RemedyTreatmentModel(
                                     name: widget.modalTitleController.text,
                                     description:
                                         widget.modalDescriptionController.text,
@@ -444,16 +534,42 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
                 }
 
                 final ailment = widget.ailments[index];
-                return Chip(
-                  padding: const EdgeInsets.all(10),
-                  deleteIcon: const Icon(Icons.clear),
-                  deleteIconColor: Colors.red,
-                  onDeleted: () {
-                    setState(() {
-                      widget.ailments.remove(ailment);
-                    });
+                return InkWell(
+                  onTap: () {
+                    widget.modalTitleController.text = ailment.name!;
+                    widget.modalDescriptionController.text =
+                        ailment.description!;
+                    _buildModalAdd(
+                      'Edit Ailment',
+                      onCancel: () {
+                        Get.close(1);
+                        widget.modalDescriptionController.clear();
+                        widget.modalTitleController.clear();
+                      },
+                      onAdd: () {
+                        widget.ailments[index] = RemedyTreatmentModel(
+                          name: widget.modalTitleController.text,
+                          description: widget.modalDescriptionController.text,
+                        );
+                        setState(() {
+                          Get.close(1);
+                          widget.modalDescriptionController.clear();
+                          widget.modalTitleController.clear();
+                        });
+                      },
+                    );
                   },
-                  label: Text('${ailment.name}'),
+                  child: Chip(
+                    padding: const EdgeInsets.all(10),
+                    deleteIcon: const Icon(Icons.clear),
+                    deleteIconColor: Colors.red,
+                    onDeleted: () {
+                      setState(() {
+                        widget.ailments.remove(ailment);
+                      });
+                    },
+                    label: Text('${ailment.name}'),
+                  ),
                 );
               },
             ),
@@ -678,30 +794,45 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
                       flex: 2,
                       child: Column(
                         children: [
-                          Obx(() {
-                            return Container(
-                              width: 150,
-                              height: 150,
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: const Color.fromARGB(
-                                        255, 101, 101, 101),
-                                    width: 2,
-                                  )),
-                              child: widget.plantDropdownController.value
-                                          .dropDownValue !=
-                                      null
-                                  ? _loadingImage(widget.plantDropdownController
-                                      .value.dropDownValue!.value.cover)
-                                  : const Icon(
-                                      Icons.image,
-                                      size: 120,
-                                      color: Color(0x49007E63),
-                                    ),
-                            );
-                          })
+                          InkWell(
+                            onTap: () {
+                              if (widget.plantDropdownController.value
+                                      .dropDownValue!.value.cover !=
+                                  null) {
+                                widget.showImagePicture(
+                                    image: widget.plantDropdownController.value
+                                        .dropDownValue!.value.cover);
+                              }
+                            },
+                            child: Obx(() {
+                              return Container(
+                                width: 150,
+                                height: 150,
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: const Color.fromARGB(
+                                          255, 101, 101, 101),
+                                      width: 2,
+                                    )),
+                                child: widget.plantDropdownController.value
+                                            .dropDownValue !=
+                                        null
+                                    ? _loadingImage(widget
+                                        .plantDropdownController
+                                        .value
+                                        .dropDownValue!
+                                        .value
+                                        .cover)
+                                    : const Icon(
+                                        Icons.image,
+                                        size: 120,
+                                        color: Color(0x49007E63),
+                                      ),
+                              );
+                            }),
+                          )
                         ],
                       ),
                     ),
@@ -716,6 +847,10 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
   }
 
   Widget _loadingImage(path) {
+    if (path == null) {
+      return Image.asset('assets/placeholder/plant_image1.jpg');
+    }
+
     return FutureBuilder(
       future: ApiImage.getImage(path),
       builder: (context, snapshot) {
@@ -1007,8 +1142,10 @@ mixin FormFunctionality {
   final List<String> symptoms = [];
   final List<IngredientModel> ingredients = [];
   final List<UsageModel> usages = [];
-  final List<AilmentModel> ailments = [];
+  final List<RemedyTreatmentModel> ailments = [];
   final List<StepModel> steps = [];
+  RxString progressMessage = ''.obs;
+  RxBool isEditMode = false.obs;
 
   void selectedPlant() {
     if (plantDropdownController.value.dropDownValue == null) {
@@ -1175,6 +1312,90 @@ mixin FormFunctionality {
     html.window.location.reload();
   }
 
+  void checkEditMode(void Function() setState) async {
+    try {
+      var remedy = await SessionRemedy.getEditRemedy();
+      if (remedy != null) {
+        isEditMode.value = true;
+        plantDropdownController.value.dropDownValue = DropDownValueModel(
+          name: remedy.plant!.name!,
+          value: remedy.plant,
+        );
+
+        nameController.text = remedy.name!;
+        typeController.text = remedy.type ?? '';
+        descriptionController.text = remedy.description!;
+
+        //
+        var value = await ApiImage.getImage(remedy.cover!);
+        if (value != null) {
+          coverImage.value = FormImageModel(
+            name: value.file_name,
+            bytes: value.image_data,
+          );
+        } else {
+          coverImage.value = null;
+        }
+
+        //
+        if (remedy.images != null) {
+          for (var i = 0; i < remedy.images!.length; i++) {
+            print(remedy.images![i].path);
+            var value = await ApiImage.getImage(remedy.images![i].path!);
+            if (value != null) {
+              otherImages.add(
+                FormImageModel(
+                  id: remedy.images![i].id,
+                  name: value.file_name,
+                  bytes: value.image_data,
+                ),
+              );
+            }
+          }
+        }
+
+        //
+
+        if (remedy.treatments != null) {
+          for (var ailment in remedy.treatments!) {
+            print(ailment.name);
+            ailments.add(ailment);
+          }
+        }
+
+        //
+        if (remedy.steps != null) {
+          for (var i = 0; i < remedy.steps!.length; i++) {
+            steps.add(remedy.steps![i]);
+          }
+        }
+
+        if (remedy.ingredients != null) {
+          for (var i = 0; i < remedy.ingredients!.length; i++) {
+            ingredients.add(remedy.ingredients![i]);
+          }
+        }
+
+        if (remedy.usages != null) {
+          for (var i = 0; i < remedy.usages!.length; i++) {
+            usages.add(remedy.usages![i]);
+          }
+        }
+      }
+
+      //
+    } catch (e) {
+      printError(info: e.toString());
+    }
+
+    setState();
+  }
+
+  void exitEditMode() {
+    isEditMode.value = false;
+    SessionRemedy.removeEditRemedy();
+  }
+
   void cancelModalWarning() {
     if (nameController.text.isEmpty &&
         typeController.text.isEmpty &&
@@ -1223,6 +1444,7 @@ mixin FormFunctionality {
           color: Colors.red,
           textColor: Colors.white,
           onPressed: () {
+            exitEditMode();
             Get.offNamed(CustomRoute.path.remediesTable);
           },
           child: const Text('Yes'),
@@ -1231,7 +1453,7 @@ mixin FormFunctionality {
     );
   }
 
-  void uploadlModalWarning() {
+  void uploadModalWarning() {
     if (!formKey.currentState!.validate()) {
       return;
     }
@@ -1343,6 +1565,121 @@ mixin FormFunctionality {
     );
   }
 
+  //
+
+  void updateModalWarning() {
+    if (!formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (coverImage.value == null) {
+      Get.snackbar(
+        padding: const EdgeInsets.all(10),
+        'Cover',
+        'Please select an cover image.',
+        backgroundColor: const Color(0xFFFFD4D4),
+        colorText: Colors.black,
+      );
+      return;
+    }
+
+    if (otherImages.isEmpty) {
+      Get.snackbar(
+        padding: const EdgeInsets.all(10),
+        'Images',
+        'Please select at least one image.',
+        backgroundColor: const Color(0xFFFFD4D4),
+        colorText: Colors.black,
+      );
+      return;
+    }
+
+    if (ailments.isEmpty) {
+      Get.snackbar(
+        padding: const EdgeInsets.all(10),
+        'Ailment',
+        'Please add at least one ailment associated.',
+        backgroundColor: const Color(0xFFFFD4D4),
+        colorText: Colors.black,
+      );
+      return;
+    }
+
+    if (steps.isEmpty) {
+      Get.snackbar(
+        padding: const EdgeInsets.all(10),
+        'Steps',
+        'Please add at least one steps.',
+        backgroundColor: const Color(0xFFFFD4D4),
+        colorText: Colors.black,
+      );
+      return;
+    }
+
+    if (usages.isEmpty) {
+      Get.snackbar(
+        padding: const EdgeInsets.all(10),
+        'Usages',
+        'Please add at least one usages.',
+        backgroundColor: const Color(0xFFFFD4D4),
+        colorText: Colors.black,
+      );
+      return;
+    }
+    if (ingredients.isEmpty) {
+      Get.snackbar(
+        padding: const EdgeInsets.all(10),
+        'Ingredient',
+        'Please add at least one ingredient.',
+        backgroundColor: const Color(0xFFFFD4D4),
+        colorText: Colors.black,
+      );
+      return;
+    }
+
+    Get.defaultDialog(
+      barrierDismissible: false,
+      titlePadding: const EdgeInsets.all(10),
+      contentPadding: const EdgeInsets.all(20),
+      title: 'Update',
+      content: RichText(
+        textAlign: TextAlign.center,
+        text: const TextSpan(
+          style: TextStyle(color: Colors.black, fontSize: 16),
+          children: [
+            TextSpan(
+              text: 'Proceed with update? \n\n',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextSpan(
+              text: 'You are about to update a new remedy.',
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        MaterialButton(
+          color: Colors.red,
+          textColor: Colors.white,
+          onPressed: () {
+            Get.close(1);
+          },
+          child: const Text('Wait'),
+        ),
+        MaterialButton(
+          color: const Color(0xFF007E62),
+          textColor: Colors.white,
+          onPressed: () {
+            Get.close(1);
+            updateForm();
+          },
+          child: const Text('Proceed'),
+        ),
+      ],
+    );
+  }
+
+  //
   void loadingModal({title, subtitle}) {
     Get.defaultDialog(
       barrierDismissible: false,
@@ -1351,16 +1688,18 @@ mixin FormFunctionality {
       title: '$title',
       content: SizedBox(
         width: 230,
-        height: 150,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text('$subtitle'),
-            const Gap(15),
-            const CircularProgressIndicator(),
-          ],
-        ),
+        height: 90,
+        child: Obx(() {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(progressMessage.value),
+              const Gap(15),
+              const CircularProgressIndicator(),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -1407,132 +1746,464 @@ mixin FormFunctionality {
   // =============================
 
   void submitForm() async {
-    if (!isValidPlant()) {
-      return;
+    var user = await SessionAccess.instance.getSessionData();
+    PlantModel plant = plantDropdownController.value.dropDownValue!.value;
+    progressMessage.value = 'Uploading remedy basic info...';
+
+    loadingModal(title: 'Uploading');
+
+    try {
+      var remedy = RemedyModel(
+        name: nameController.text,
+        type: typeController.text,
+        description: descriptionController.text,
+        plant_id: plant.id,
+        create_by: user,
+      );
+
+      ResponseModel response = await ApiRemedy.uploadRemedy(remedy: remedy);
+
+      if (response.success == false || response.errors != null) {
+        Get.close(1);
+        failedModal(
+          title: 'Failed',
+          subtitle: 'Failed to create remedy',
+        );
+        return;
+      }
+
+      if (response.clientError ?? false) {
+        Get.close(1);
+        failedModal(
+          title: 'Failed',
+          subtitle: response.message,
+        );
+        return;
+      }
+
+      var remedyUploaded = RemedyModel.fromJson(response.data!);
+
+      progressMessage.value = 'Uploading ingredients...';
+
+      for (var ingredient in ingredients) {
+        var response = await ApiRemedy.uploadIngredient(
+          ingredient: IngredientModel(
+            remedy_id: remedyUploaded.id,
+            name: ingredient.name,
+            description: ingredient.description,
+          ),
+        );
+
+        if (response.success == false || response.errors != null) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: 'Failed to create ingredient',
+          );
+          return;
+        }
+
+        if (response.clientError ?? false) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: response.message,
+          );
+          return;
+        }
+
+        print('Ingredient uploaded successfully');
+      }
+
+      progressMessage.value = 'Uploading treatments...';
+
+      for (var treatment in ailments) {
+        var response = await ApiRemedy.uploadTeatment(
+          treatment: RemedyTreatmentModel(
+            remedy_id: remedyUploaded.id,
+            name: treatment.name,
+            description: treatment.description,
+          ),
+        );
+
+        if (response.success == false || response.errors != null) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: 'Failed to create treatment',
+          );
+          return;
+        }
+
+        if (response.clientError ?? false) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: response.message,
+          );
+          return;
+        }
+
+        print('Treatment uploaded successfully');
+      }
+
+      progressMessage.value = 'Uploading steps...';
+
+      for (var step in steps) {
+        var response = await ApiRemedy.uploadStep(
+          step: StepModel(
+            remedy_id: remedyUploaded.id,
+            name: step.name,
+            description: step.description,
+          ),
+        );
+
+        if (response.success == false || response.errors != null) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: 'Failed to create step',
+          );
+          return;
+        }
+
+        if (response.clientError ?? false) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: response.message,
+          );
+          return;
+        }
+
+        print('Step uploaded successfully');
+      }
+
+      progressMessage.value = 'Uploading usages...';
+
+      for (var usage in usages) {
+        var response = await ApiRemedy.uploadUsage(
+          usage: UsageModel(
+            remedy_id: remedyUploaded.id,
+            name: usage.name,
+            description: usage.description,
+          ),
+        );
+
+        if (response.success == false || response.errors != null) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: 'Failed to create usage',
+          );
+          return;
+        }
+
+        if (response.clientError ?? false) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: response.message,
+          );
+          return;
+        }
+
+        print('Usage uploaded successfully');
+      }
+
+      progressMessage.value = 'Uploading remedies images...';
+
+      if (coverImage.value != null) {
+        var response =
+            await ApiRemedy.uploadCover(remedyUploaded, coverImage.value!);
+        if (response.success == false || response.errors != null) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: 'Failed to upload cover image',
+          );
+          return;
+        }
+
+        if (response.clientError ?? false) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: response.message,
+          );
+          return;
+        }
+
+        print('Cover image uploaded successfully');
+      }
+
+      //
+
+      for (var image in otherImages) {
+        var response = await ApiRemedy.uploadImage(remedyUploaded, image);
+        if (response.success == false || response.errors != null) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: 'Failed to upload image',
+          );
+          return;
+        }
+
+        if (response.clientError ?? false) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: response.message,
+          );
+          return;
+        }
+
+        print('Image uploaded successfully');
+      }
+
+      Get.close(1);
+      successModal(
+        title: 'Success',
+        subtitle: 'Remedy created successfully',
+      );
+    } catch (e) {
+      print(e);
     }
-    //FOR PLANT
+  }
 
-    //FOR REMEDY
-    // if (!isValidRemedyForm()) {
-    //   formKey.currentState!.validate();
-    //   return;
-    // }
+  //
 
-    // var name = GetUtils.capitalizeFirst(nameController.text.trim());
-    // var type = GetUtils.capitalizeFirst(typeController.text.trim());
-    // var description =
-    //     GetUtils.capitalizeFirst(descriptionController.text.trim());
+  void updateForm() async {
+    var user = await SessionAccess.instance.getSessionData();
+    PlantModel plant = plantDropdownController.value.dropDownValue!.value;
 
-    // loadingModal(title: 'Uploading', subtitle: 'Please wait...');
+    progressMessage.value = 'Updating remedy basic info...';
+    loadingModal(title: 'Updating');
 
-    // UserModel user = await SessionAccess.instance.getSessionData();
+    try {
+      //for update
+      var oldRemedy = await SessionRemedy.getEditRemedy();
 
-    // PlantModel plantSelected =
-    //     plantDropdownController.value.dropDownValue!.value;
+      var remedy = RemedyModel(
+        id: oldRemedy!.id,
+        name: nameController.text,
+        type: typeController.text,
+        description: descriptionController.text,
+        plant_id: plant.id,
+        update_by: user,
+        create_by: user,
+      );
 
-    // var remedy = RemedyModel(
-    //   name: name,
-    //   description: description,
-    //   plant: plantSelected,
-    //   user_create_by: user,
-    //   user_update_by: user,
-    // );
+      ResponseModel response = await ApiRemedy.updateRemedy(remedy: remedy);
 
-    // var cover = coverImage.value;
+      if (response.success == false || response.errors != null) {
+        Get.close(1);
+        failedModal(
+          title: 'Failed',
+          subtitle: 'Failed to Updated remedy',
+        );
+        return;
+      }
 
-    // var remedyResult =
-    //     await ApiRemedy.uploadRemedy(remedy: remedy, cover: cover!);
+      if (response.clientError ?? false) {
+        Get.close(1);
+        failedModal(
+          title: 'Failed',
+          subtitle: response.message,
+        );
+        return;
+      }
 
-    // if (remedyResult == null) {
-    //   Get.close(1);
-    //   failedModal(title: 'Failed', subtitle: 'Remedy failed to upload.');
-    //   return;
-    // }
+      progressMessage.value = 'Updating ingredients...';
+      await ApiRemedy.clearIngredient(remedyID: oldRemedy.id!);
 
-    // var newRemedy = RemedyModel(id: remedyResult.id, name: remedyResult.name);
+      for (var ingredient in ingredients) {
+        var response = await ApiRemedy.uploadIngredient(
+          ingredient: IngredientModel(
+            remedy_id: oldRemedy.id,
+            name: ingredient.name,
+            description: ingredient.description,
+          ),
+        );
 
-    // for (var ailment in ailments) {
-    //   var withIdAilment = AilmentModel(
-    //     name: ailment.name,
-    //     description: ailment.description,
-    //     remedy_id: newRemedy.id,
-    //   );
+        if (response.success == false || response.errors != null) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: 'Failed to Update ingredient',
+          );
+          return;
+        }
 
-    //   var remedyAilment = await ApiRemedy.uploadRemedyAilment(withIdAilment);
+        if (response.clientError ?? false) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: response.message,
+          );
+          return;
+        }
 
-    //   if (remedyAilment == null) {
-    //     Get.close(1);
-    //     failedModal(
-    //         title: 'Failed', subtitle: 'Remedy Ailments failed to upload.');
-    //     return;
-    //   }
-    // }
+        print('Ingredient Updated successfully');
+      }
 
-    // for (var step in steps) {
-    //   var withIdStep = StepModel(
-    //     name: step.name,
-    //     description: step.description,
-    //     remedy_id: newRemedy.id,
-    //   );
+      progressMessage.value = 'Updating treatments...';
+      await ApiRemedy.clearTreatments(id: oldRemedy.id!);
 
-    //   var remedyStep = await ApiRemedy.uploadRemedySteps(withIdStep);
+      for (var treatment in ailments) {
+        var response = await ApiRemedy.uploadTeatment(
+          treatment: RemedyTreatmentModel(
+            remedy_id: oldRemedy.id,
+            name: treatment.name,
+            description: treatment.description,
+          ),
+        );
 
-    //   if (remedyStep == null) {
-    //     Get.close(1);
-    //     failedModal(
-    //         title: 'Failed', subtitle: 'Remedy Steps failed to upload.');
-    //     return;
-    //   }
-    // }
+        if (response.success == false || response.errors != null) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: 'Failed to Update treatment',
+          );
+          return;
+        }
 
-    // for (var usage in usages) {
-    //   var withIdUsage = UsageModel(
-    //     name: usage.name,
-    //     description: usage.description,
-    //     remedy_id: newRemedy.id,
-    //   );
+        if (response.clientError ?? false) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: response.message,
+          );
+          return;
+        }
 
-    //   var remedyUsage = await ApiRemedy.uploadRemedyUsage(withIdUsage);
+        print('Treatment Updated successfully');
+      }
 
-    //   if (remedyUsage == null) {
-    //     Get.close(1);
-    //     failedModal(
-    //         title: 'Failed', subtitle: 'Remedy Usages failed to upload.');
-    //     return;
-    //   }
-    // }
+      progressMessage.value = 'Updating steps...';
+      await ApiRemedy.clearSteps(remedyId: oldRemedy.id!);
 
-    // //
-    // for (var ingredient in ingredients) {
-    //   var withIdIngredient = IngredientModel(
-    //     name: ingredient.name,
-    //     description: ingredient.description,
-    //     remedy_id: newRemedy.id,
-    //   );
+      for (var step in steps) {
+        var response = await ApiRemedy.uploadStep(
+          step: StepModel(
+            remedy_id: oldRemedy.id,
+            name: step.name,
+            description: step.description,
+          ),
+        );
 
-    //   var remedyIngredient =
-    //       await ApiRemedy.uploadRemedyIngredient(withIdIngredient);
+        if (response.success == false || response.errors != null) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: 'Failed to Update step',
+          );
+          return;
+        }
 
-    //   if (remedyIngredient == null) {
-    //     Get.close(1);
-    //     failedModal(
-    //         title: 'Failed', subtitle: 'Remedy Ingredients failed to upload.');
-    //     return;
-    //   }
-    // }
+        if (response.clientError ?? false) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: response.message,
+          );
+          return;
+        }
 
-    // //
-    // for (var image in otherImages.value) {
-    //   var remedyImage = await ApiRemedy.uploadRemedyImage(newRemedy, image);
+        print('Step Updated successfully');
+      }
 
-    //   if (remedyImage == null) {
-    //     Get.close(1);
-    //     failedModal(
-    //         title: 'Failed', subtitle: 'Remedy images failed to upload.');
-    //     return;
-    //   }
-    // }
+      progressMessage.value = 'Updating usages...';
+      await ApiRemedy.clearUsages(remedyId: oldRemedy.id!);
 
-    // successModal(title: 'Uploaded', subtitle: 'Remedy Uploaded success');
+      for (var usage in usages) {
+        var response = await ApiRemedy.uploadUsage(
+          usage: UsageModel(
+            remedy_id: oldRemedy.id,
+            name: usage.name,
+            description: usage.description,
+          ),
+        );
+
+        if (response.success == false || response.errors != null) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: 'Failed to Updated usage',
+          );
+          return;
+        }
+
+        if (response.clientError ?? false) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: response.message,
+          );
+          return;
+        }
+
+        print('Usage Updated successfully');
+      }
+
+      progressMessage.value = 'Updating remedy images...';
+      await ApiRemedy.clearImages(remedy: oldRemedy);
+
+      if (coverImage.value != null) {
+        var response =
+            await ApiRemedy.uploadCover(oldRemedy, coverImage.value!);
+        if (response.success == false || response.errors != null) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: 'Failed to Update cover image',
+          );
+          return;
+        }
+
+        if (response.clientError ?? false) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: response.message,
+          );
+          return;
+        }
+
+        print('Cover image Updated successfully');
+      }
+
+      //
+
+      await ApiRemedy.clearImages(remedy: oldRemedy);
+      for (var image in otherImages) {
+        var response = await ApiRemedy.uploadImage(oldRemedy, image);
+        if (response.success == false || response.errors != null) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: 'Failed to upload image',
+          );
+          return;
+        }
+
+        if (response.clientError ?? false) {
+          Get.close(1);
+          failedModal(
+            title: 'Failed',
+            subtitle: response.message,
+          );
+          return;
+        }
+
+        print('Image Updated successfully');
+      }
+
+      Get.close(1);
+      successModal(title: 'Success', subtitle: 'Remedy updated successfully');
+    } catch (e) {
+      print(e);
+    }
   }
 }

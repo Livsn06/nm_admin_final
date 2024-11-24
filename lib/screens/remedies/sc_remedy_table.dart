@@ -3,7 +3,9 @@ import 'dart:typed_data';
 import 'package:admin/api/image/api_image.dart';
 import 'package:admin/controllers/ct_plant.dart';
 import 'package:admin/controllers/ct_remedy.dart';
+import 'package:admin/models/remedies/md_remedy.dart';
 import 'package:admin/routes/rt_routers.dart';
+import 'package:admin/sessions/sn_remedy.dart';
 import 'package:admin/widgets/wg_appbar.dart';
 import 'package:admin/widgets/wg_drawer.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +15,7 @@ import 'package:get/get.dart';
 class RemedyTableScreen extends StatelessWidget {
   RemedyTableScreen({super.key});
   var remedyController = Get.put(RemedyController());
-
+  var searchTextController = TextEditingController();
   //
   @override
   Widget build(BuildContext context) {
@@ -89,7 +91,7 @@ class RemedyTableScreen extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               TextField(
-                controller: TextEditingController(),
+                controller: searchTextController,
                 style: const TextStyle(color: Colors.black, fontSize: 16),
                 decoration: InputDecoration(
                   labelText: 'Search',
@@ -100,6 +102,10 @@ class RemedyTableScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
+                onChanged: (value) {
+                  remedyController.remedyData.value =
+                      remedyController.filterByPlantName(value);
+                },
               ),
               MaterialButton(
                 color: const Color(0xFF007E62),
@@ -144,7 +150,10 @@ class RemedyTableScreen extends StatelessWidget {
         return ListView.builder(
             itemCount: remedyController.remedyData.value.length,
             itemBuilder: (context, index) {
-              var remedy = remedyController.remedyData.value[index];
+              RemedyModel remedy;
+
+              remedy = remedyController.remedyData.value[index];
+
               return Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
@@ -155,6 +164,13 @@ class RemedyTableScreen extends StatelessWidget {
                   ),
                 ),
                 child: ListTile(
+                  onTap: () async {
+                    await SessionRemedy.addEditRemedy(remedy);
+                    Get.toNamed(
+                      CustomRoute.path.remediesCreate,
+                      preventDuplicates: true,
+                    );
+                  },
                   tileColor: Colors.white,
                   style: ListTileStyle.list,
                   leading: SizedBox(
@@ -200,7 +216,7 @@ class RemedyTableScreen extends StatelessWidget {
         }
         if (snapshot.hasData) {
           return Image.memory(
-            snapshot.data as Uint8List,
+            snapshot.data!.image_data!,
           );
         } else {
           return const Center(child: CircularProgressIndicator());
