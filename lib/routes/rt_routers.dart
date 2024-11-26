@@ -7,6 +7,7 @@ import 'package:admin/screens/plants/sc_plant_table.dart';
 import 'package:admin/screens/remedies/sc_remedy_create.dart';
 import 'package:admin/screens/remedies/sc_remedy_table.dart';
 import 'package:admin/screens/requests/sc_request_table.dart';
+import 'package:admin/screens/settings/sc_setting_info.dart';
 import 'package:admin/screens/settings/sc_settings.dart';
 import 'package:admin/screens/start/sc_landing.dart';
 import 'package:admin/screens/workplace/sc_workplace.dart';
@@ -40,7 +41,8 @@ enum RouteSetting {
   workspace,
   users,
   notification,
-  settings;
+  settings,
+  myProfile;
 
   String get name {
     switch (this) {
@@ -78,6 +80,8 @@ enum RouteSetting {
         return '/notifications';
       case settings:
         return '/settings';
+      case myProfile:
+        return '/myProfile';
       default:
         return '/error';
     }
@@ -105,6 +109,7 @@ class CustomRoute {
   String get users => '/dashboard/users';
   String get notification => '/dashboard/notifications';
   String get settings => '/dashboard/settings';
+  String get myProfile => '/dashboard/settings/myProfile';
   String get unknown => '/error';
 }
 
@@ -226,6 +231,14 @@ class AppRoute {
         GetPage(
           name: RouteSetting.settings.name,
           page: () => const SettingScreen(),
+          preventDuplicates: true,
+          children: [
+            GetPage(
+              name: RouteSetting.myProfile.name,
+              page: () => MyProfileScreen(),
+              preventDuplicates: true,
+            ),
+          ],
         ),
       ],
     ),

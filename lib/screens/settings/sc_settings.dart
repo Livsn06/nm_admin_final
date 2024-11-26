@@ -1,9 +1,12 @@
+import 'package:admin/routes/rt_routers.dart';
 import 'package:admin/widgets/wg_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'dart:html' as html;
 
 import 'package:get/get.dart';
+
+import '../../widgets/wg_appbar.dart';
 
 class SettingScreen extends StatelessWidget {
   const SettingScreen({super.key});
@@ -13,86 +16,48 @@ class SettingScreen extends StatelessWidget {
     html.document.title = 'Naturemedix | Settings';
     return Scaffold(
       drawer: customDrawer(),
-      body: Center(
-        child: SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: LayoutBuilder(builder: (context, constraint) {
-            return Stack(
-              children: [
-                Positioned(
-                  top: 60,
-                  left: 0,
-                  child: _buildBody(constraint),
-                ),
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  child: _buildNavigation(context, constraint),
-                ),
-              ],
-            );
-          }),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavigation(context, constraint) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      width: constraint.maxWidth,
-      height: 60,
-      decoration: const BoxDecoration(
-        color: Color(0xFF007E62),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
-            'Settings',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
+      appBar: customAppBar(
+        context,
+        title: 'Settings',
+        isPrimary: true,
+        actions: [
+          InkWell(
+            highlightColor: Colors.transparent,
+            splashColor: Colors.transparent,
+            onTap: () {},
+            child: const CircleAvatar(
+              radius: 18,
+              child: Icon(
+                Icons.notifications,
+                color: Color(0xFF007E62),
+              ),
             ),
           ),
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () {},
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.notifications,
-                    color: Color(0xFF007E62),
-                  ),
-                ),
-              ),
-              const Gap(10),
-              GestureDetector(
+          const Gap(10),
+          Builder(
+            builder: (BuildContext context) {
+              return InkWell(
+                highlightColor: Colors.transparent,
+                splashColor: Colors.transparent,
                 onTap: () {
                   Scaffold.of(context).openDrawer();
                 },
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
+                child: const CircleAvatar(
+                  radius: 18,
+                  child: Icon(
                     Icons.menu_sharp,
                     color: Color(0xFF007E62),
                   ),
                 ),
-              ),
-            ],
-          )
+              );
+            },
+          ),
+          const Gap(20),
         ],
       ),
+      body: LayoutBuilder(builder: (context, constraint) {
+        return _buildBody(constraint);
+      }),
     );
   }
 
@@ -101,12 +66,127 @@ class SettingScreen extends StatelessWidget {
       width: constraint.maxWidth,
       height: constraint.maxHeight,
       color: const Color(0xFFEFEFEF),
-      child: const Center(
-        child: Text(
-          'Settings',
-          style: TextStyle(
+      child: Center(
+        child: _buildRequestOption(),
+      ),
+    );
+  }
+
+  Widget _buildRequestOption() {
+    //
+    return LayoutBuilder(builder: (context, constraints) {
+      return Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            optionButton(
+              imagePath: 'assets/sys_image/ast_setting_hero.jpg',
+              title: 'My Account',
+              subtitle: 'Your account basic information.',
+              isNew: true,
+              onTap: () {
+                Get.toNamed(CustomRoute.path.myProfile);
+              },
+            ),
+            const Gap(4),
+            optionButton(
+              imagePath: 'assets/sys_image/ast_setting_hero2.jpg',
+              title: 'About us',
+              subtitle: 'Know more about Naturemedix.',
+              isNew: true,
+              onTap: () {
+                // Get.toNamed(CustomRoute.path.workplace);
+              },
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget optionButton({
+    Function()? onTap,
+    String? imagePath,
+    String? title,
+    String? subtitle,
+    bool isNew = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Card(
+        elevation: 3,
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              _buildImage(imagePath),
+              const Gap(30),
+              _buildTitles(title, subtitle),
+              const Spacer(),
+              _buildBanner(isNew),
+              const Gap(30),
+              _buildIcon()
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImage(imagePath) {
+    return Image.asset(
+      imagePath ?? 'assets/images/image5.png',
+      height: 100,
+    );
+  }
+
+  Widget _buildTitles(title, subtitle) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title ?? 'Title',
+          style: const TextStyle(
             color: Colors.black,
-            fontSize: 20,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          subtitle ?? 'Subtitle',
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIcon() {
+    return const Icon(
+      Icons.arrow_right,
+      size: 30,
+    );
+  }
+
+  Widget _buildBanner(bool isNew) {
+    return Visibility(
+      visible: isNew,
+      child: Container(
+        decoration: BoxDecoration(
+            color: Colors.red, borderRadius: BorderRadius.circular(10)),
+        padding: const EdgeInsets.symmetric(
+          vertical: 6,
+          horizontal: 26,
+        ),
+        child: const Text(
+          'New',
+          style: TextStyle(
+            color: Colors.white,
           ),
         ),
       ),

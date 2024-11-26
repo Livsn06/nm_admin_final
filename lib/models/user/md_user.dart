@@ -51,7 +51,7 @@ class UserModel {
   UserModel.fromJson(Map<String, dynamic> json) {
     id = _toInt(json['id']);
     firstname = _splitName(_toString(json['name']), ',', 0);
-    lastname = _splitName(_toString(json['name']), ',', 0);
+    lastname = _splitName(_toString(json['name']), ',', 1);
 
     email = _toString(json['email']);
     type = _toString(json['type']);

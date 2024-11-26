@@ -1,4 +1,3 @@
-import 'package:admin/sessions/sn_access.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -29,7 +28,8 @@ class RouteMiddleware extends GetMiddleware {
         route == CustomRoute.path.users ||
         route == CustomRoute.path.notification ||
         route == CustomRoute.path.settings ||
-        route == CustomRoute.path.plantsCreate) {
+        route == CustomRoute.path.plantsCreate ||
+        route == CustomRoute.path.myProfile) {
       return true;
     } else {
       return false;
