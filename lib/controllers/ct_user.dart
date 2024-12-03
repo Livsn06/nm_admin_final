@@ -37,10 +37,10 @@ mixin DataSourceApi {
     isLoading.value = true;
     var response = await ApiUser.fetchAllUser();
 
-    if (response.success && response.dataList != null) {
+    if (response != null) {
       isLoading.value = false;
       isError.value = false;
-      return UserModel.listFromJson(response.dataList!);
+      return response;
     } else {
       isLoading.value = false;
       isError.value = true;
@@ -55,10 +55,10 @@ mixin DataSourceApi {
 
     var response = await ApiUser.fetchRoleUser(role);
 
-    if (response.success && response.dataList != null) {
+    if (response != null) {
       isLoading.value = false;
       isError.value = false;
-      return UserModel.listFromJson(response.dataList!);
+      return response;
     } else {
       isLoading.value = false;
       isError.value = true;

@@ -1,83 +1,49 @@
+import 'package:admin/models/ailments/md_ailment.dart';
 import 'package:admin/models/plant/md_plant.dart';
 
 class PlantTreatmentModel {
   int? id;
-  String? name;
-  String? description;
-  int? plant_id;
+  PlantModel? plant;
+  AilmentModel? ailment;
   String? created_at;
   String? updated_at;
 
   PlantTreatmentModel({
     this.id,
-    this.name,
-    this.description,
-    this.plant_id,
+    this.plant,
+    this.ailment,
     this.created_at,
     this.updated_at,
   });
 
   static List<PlantTreatmentModel> fromJsonList(List<dynamic> jsonList) {
     if (jsonList.isEmpty) return [];
-    return jsonList
-        .map((json) => PlantTreatmentModel().fromJson(json))
-        .toList();
+    return jsonList.map((json) => PlantTreatmentModel.fromJson(json)).toList();
   }
 
-  PlantTreatmentModel fromJson(Map<String, dynamic> json) {
+  static PlantTreatmentModel fromJson(Map<String, dynamic> json) {
     return PlantTreatmentModel(
-      id: _toID(json['id']),
-      name: _toName(json['name']),
-      description: _toDescription(json['description']),
-      plant_id: _toPlant(json['plant_id']),
-      created_at: _toCreatedAt(json['created_at']),
-      updated_at: _toUpdatedAt(json['updated_at']),
+      id: json['id'] ?? 0,
+      plant: json['plant'] != null ? PlantModel.fromJson(json['plant']) : null,
+      ailment: json['treatment'] != null
+          ? AilmentModel.fromJson(json['treatment'])
+          : null,
+      created_at: json['created_at'],
+      updated_at: json['updated_at'],
     );
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['name'] = name;
-    data['description'] = description;
-    data['plant_id'] = plant_id.toString();
+    data['plant_id'] = plant!.id;
+    data['treatment_id'] = ailment!.id;
     return data;
   }
 
-  Map<String, dynamic> toUpdateJson() {
+  Map<String, dynamic> toCreateJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['name'] = name;
-    data['description'] = description;
+    data['plant_id'] = plant!.id.toString();
+    data['treatment_id'] = ailment!.id.toString();
     return data;
-  }
-
-  //-------------------
-  _toID(jId) {
-    if (jId == null) return 0;
-    return int.parse(jId.toString());
-  }
-
-  _toName(jName) {
-    if (jName == null) return 'Undefined';
-    return jName.toString().trim();
-  }
-
-  _toDescription(jDesc) {
-    if (jDesc == null) return 'None';
-    return jDesc.toString().trim();
-  }
-
-  _toCreatedAt(jCreatedAt) {
-    if (jCreatedAt == null) return 'Undefined';
-    return jCreatedAt.toString().trim();
-  }
-
-  _toUpdatedAt(jUpdatedAt) {
-    if (jUpdatedAt == null) return 'Undefined';
-    return jUpdatedAt.toString().trim();
-  }
-
-  _toPlant(jPlant) {
-    if (jPlant == null) return 0;
-    return int.parse(jPlant.toString());
   }
 }

@@ -7,14 +7,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SessionAccess {
   static SessionAccess instance = SessionAccess();
 
-  Future<void> createSession(UserModel admin, String token) async {
+  Future<void> createSession(UserModel admin) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setInt('id', admin.id!);
-    prefs.setString('firstname', '${admin.firstname}');
-    prefs.setString('lastname', '${admin.lastname}');
+    prefs.setString('name', '${admin.name}');
     prefs.setString('email', '${admin.email}');
-    prefs.setString('token', token);
+    prefs.setString('access_token', admin.access_token!);
     prefs.setString('status', admin.status!);
+    prefs.setString('phone', admin.phone!);
+    prefs.setString('address', admin.address!);
     prefs.setString('created_at', admin.created_at!);
     prefs.setString('updated_at', admin.updated_at!);
     log('Session created Successfully', name: 'SESSION CREATED');
@@ -23,19 +24,21 @@ class SessionAccess {
   Future<UserModel> getSessionData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int? id = prefs.getInt('id');
-    String? firstname = prefs.getString('firstname');
-    String? lastname = prefs.getString('lastname');
+    String? name = prefs.getString('name');
     String? email = prefs.getString('email');
     String? status = prefs.getString('status');
+    String? phone = prefs.getString('phone');
+    String? address = prefs.getString('address');
     String? createdAt = prefs.getString('created_at');
     String? updatedAt = prefs.getString('updated_at');
 
     UserModel admin = UserModel(
       id: id,
-      firstname: firstname,
-      lastname: lastname,
+      name: name,
       email: email,
       status: status,
+      phone: phone,
+      address: address,
       created_at: createdAt,
       updated_at: updatedAt,
     );
@@ -44,7 +47,7 @@ class SessionAccess {
 
   Future<String?> getSessionToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
+    String? token = prefs.getString('access_token');
     return token;
   }
 
@@ -57,19 +60,15 @@ class SessionAccess {
 
     var session = await SessionApi.auth.session(storedToken);
 
-    if (session == null) {
+    if (session == 'Cannot connect to server') {
       return false;
     }
 
-    var isNotActive = session.success == false ||
-        session.isActive == null ||
-        !session.isActive!;
-
-    if (isNotActive) {
+    if (session == 'Unauthenticated') {
       return false;
     }
 
-    if (session.success == true && session.isActive!) {
+    if (session == 'Session accepted') {
       return true;
     }
 

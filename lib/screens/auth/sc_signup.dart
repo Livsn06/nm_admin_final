@@ -9,14 +9,22 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'dart:html' as html;
 
-class SignupScreen extends StatefulWidget with SignUpFormController {
-  SignupScreen({super.key});
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+  final formKey = GlobalKey<FormState>();
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+  String? emailExistError;
+  bool showPassword = false;
+
   @override
   Widget build(BuildContext context) {
     html.document.title = 'Naturemedix | Signup';
@@ -26,21 +34,17 @@ class _SignupScreenState extends State<SignupScreen> {
         child: Container(
           width: double.maxFinite,
           height: double.maxFinite,
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/sys_image/ast_landing_bg.jpg'),
-              fit: BoxFit.cover,
-              alignment: Alignment.center,
-              opacity: 0.4,
-            ),
-          ),
+          decoration: _buildBackgroundImage(),
           child: LayoutBuilder(builder: (context, constraint) {
             return Stack(
               children: [
+                // BODY CONTENTS
                 Align(
                   alignment: Alignment.center,
                   child: _buildBody(constraint),
                 ),
+
+                // LOGO
                 Positioned(
                   top: 20,
                   left: 30,
@@ -54,6 +58,7 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
+  //? ====[ BODY CONTENTS ]===
   Widget _buildBody(constraint) {
     return SingleChildScrollView(
       child: Container(
@@ -79,6 +84,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // ================ TITLE
                   const Text(
                     'REGISTER',
                     style: TextStyle(
@@ -86,6 +92,8 @@ class _SignupScreenState extends State<SignupScreen> {
                       fontWeight: FontWeight.w900,
                     ),
                   ),
+
+                  // ================ SUBTITLE
                   const Gap(5),
                   const Text(
                     'Create a new account',
@@ -93,6 +101,8 @@ class _SignupScreenState extends State<SignupScreen> {
                       fontSize: 14,
                     ),
                   ),
+
+                  // ================ DIVIDER
                   const Gap(8),
                   const SizedBox(
                     width: 200,
@@ -101,54 +111,60 @@ class _SignupScreenState extends State<SignupScreen> {
                       color: Colors.grey,
                     ),
                   ),
+
+                  // =============== SIGNUP FORM
                   const Gap(30),
                   Form(
-                    key: widget.formKey,
+                    key: formKey,
                     child: Column(
                       children: [
-                        TextFormField(
-                          controller: widget.firstNameController,
-                          decoration: _buildFormDecoration('First Name'),
-                          validator: widget.validateFirstName,
-                        ),
+                        // ================ NAME TEXTFIELD
                         const Gap(10),
                         TextFormField(
-                          controller: widget.lastNameController,
-                          decoration: _buildFormDecoration('Last Name'),
-                          validator: widget.validateLastName,
+                          controller: nameController,
+                          decoration: _buildFormDecoration('Name'),
+                          validator: validateLastName,
                         ),
+
+                        // ================ EMAIL TEXTFIELD
                         const Gap(10),
                         TextFormField(
-                          controller: widget.emailController,
+                          controller: emailController,
                           decoration: _buildFormDecoration('Email Address'),
                           style: const TextStyle(
                             fontSize: 14.5,
                           ),
-                          validator: widget.validateEmail,
+                          validator: validateEmail,
                         ),
+
+                        // ================ PASSWORD TEXTFIELD
                         const Gap(10),
                         TextFormField(
-                          controller: widget.passwordController,
+                          controller: passwordController,
                           decoration: _buildFormDecoration('Password',
                               isPassword: true),
-                          obscureText: !widget.showPassword,
-                          validator: widget.validatePassword,
+                          obscureText: !showPassword,
+                          validator: validatePassword,
                         ),
+
+                        // =============== CONFIRM PASSWORD TEXTFIELD
                         const Gap(10),
                         TextFormField(
-                          controller: widget.confirmPasswordController,
+                          controller: confirmPasswordController,
                           decoration: _buildFormDecoration('Confirm Password',
                               isPassword: true),
-                          obscureText: !widget.showPassword,
-                          validator: widget.validateConfirmPassword,
+                          obscureText: !showPassword,
+                          validator: validateConfirmPassword,
                         ),
+
+                        // =============== SIGNUP BUTTON
                         const Gap(20),
                         MaterialButton(
                           minWidth: 440,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 40, vertical: 16),
                           color: const Color(0xFF007E62),
-                          onPressed: widget.registerCredentials,
+                          onPressed: registerCredentials,
                           child: const Text(
                             'Sign up',
                             style: TextStyle(
@@ -173,7 +189,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       const Gap(5),
                       GestureDetector(
                         onTap: () {
-                          widget.gotoLoginScreen();
+                          gotoLoginScreen();
                         },
                         child: const Text(
                           'Login',
@@ -194,32 +210,15 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  InputDecoration _buildFormDecoration(label, {isPassword = false}) {
-    return InputDecoration(
-      labelText: label,
-      border: const OutlineInputBorder(),
-      constraints: const BoxConstraints(
-        maxWidth: 430,
-      ),
-      suffixIcon: isPassword
-          ? IconButton(
-              icon: Icon(
-                widget.showPassword ? Icons.visibility : Icons.visibility_off,
-              ),
-              onPressed: () {
-                setState(() {
-                  widget.showPasswordToggle();
-                });
-              },
-            )
-          : null,
-    );
-  }
+  ///=======================================================================================================
+  ///
+  ///
 
+  //? ===[ LOGO ]====
   Widget _buildLogo() {
     return GestureDetector(
       onTap: () {
-        widget.backtoLandingScreen();
+        backtoLandingScreen();
       },
       child: RichText(
         text: const TextSpan(
@@ -244,65 +243,36 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
     );
   }
-}
 
-mixin SignUpFormController {
-  final formKey = GlobalKey<FormState>();
-  final firstNameController = TextEditingController();
-  final lastNameController = TextEditingController();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
-  ErrorModel? error;
-  bool showPassword = false;
-  void registerCredentials() async {
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
+  ///
 
-    var user = UserModel(
-      firstname: firstNameController.text,
-      lastname: lastNameController.text,
-      email: emailController.text,
-      password: passwordController.text,
-      confirm_password: confirmPasswordController.text,
+  //? ===[ TEXT FIELDS/INPUTS RELATED ]====
+  InputDecoration _buildFormDecoration(label,
+      {void iconOnpress, isPassword = false}) {
+    return InputDecoration(
+      labelText: label,
+      border: const OutlineInputBorder(),
+      constraints: const BoxConstraints(
+        maxWidth: 430,
+      ),
+      suffixIcon: isPassword
+          ? IconButton(
+              icon: Icon(
+                showPassword ? Icons.visibility : Icons.visibility_off,
+              ),
+              onPressed: () {
+                setState(() {
+                  showPasswordToggle();
+                });
+              },
+            )
+          : null,
     );
-
-    showLoading('Registering', 'Please wait...');
-
-    var response = await SignupApi.auth.register(user);
-    Get.close(1);
-
-    if (response.clientError ?? false) {
-      showFailedDialog('Failed', 'Something went Wrong!');
-      return;
-    }
-
-    if (response.success == false && response.errors != null) {
-      error = ErrorModel.fromJson(response.errors!);
-      formKey.currentState!.validate();
-      error = null;
-      return;
-    }
-
-    if (response.success == true && response.data != null) {
-      showSuccessDialog('Success', 'Registered successfully!');
-      resetForm();
-    }
   }
 
-//Controls
-  void showPasswordToggle() {
-    showPassword = !showPassword;
-  }
-
-  void resetForm() {
-    firstNameController.clear();
-    lastNameController.clear();
-    emailController.clear();
-    passwordController.clear();
-    confirmPasswordController.clear();
-  }
+  ///
+  ///=======================================================================================================
+  ///
 
   // validations
 
@@ -312,9 +282,6 @@ mixin SignUpFormController {
     }
     if (!GetUtils.isAlphabetOnly(value.removeAllWhitespace)) {
       return 'Invalid. First name can only contain alphabets';
-    }
-    if (error?.name != null) {
-      return error?.name;
     }
     return null;
   }
@@ -326,10 +293,6 @@ mixin SignUpFormController {
     if (!GetUtils.isAlphabetOnly(value.removeAllWhitespace)) {
       return 'Invalid. Last name can only contain alphabets';
     }
-
-    if (error?.name != null) {
-      return error?.name;
-    }
     return null;
   }
 
@@ -340,8 +303,8 @@ mixin SignUpFormController {
     if (!GetUtils.isEmail(value)) {
       return 'Invalid. Please enter a valid email address';
     }
-    if (error?.email != null) {
-      return error?.email;
+    if (emailExistError != null) {
+      return emailExistError;
     }
     return null;
   }
@@ -356,9 +319,7 @@ mixin SignUpFormController {
     if (GetUtils.isAlphabetOnly(value)) {
       return 'Required. Password must contain special characters or numbers';
     }
-    if (error?.password != null) {
-      return error?.password;
-    }
+
     return null;
   }
 
@@ -370,22 +331,59 @@ mixin SignUpFormController {
       return 'Invalid. Passwords do not match';
     }
 
-    if (error?.password != null) {
-      return error?.password;
-    }
     return null;
   }
 
-  //navigations
+  ///
+  ///=======================================================================================================
+  ///
+
+  //? ===[ BACK TO LANDING SCREEN ]====
   void backtoLandingScreen() {
     Get.offAllNamed(CustomRoute.path.root);
   }
 
+  //? ===[ GOTO LOGIN SCREEN ]====
   void gotoLoginScreen() {
     Get.offNamed(CustomRoute.path.login, preventDuplicates: true);
   }
 
-  //Modals
+  ///
+  ///=======================================================================================================
+  ///
+
+  //? ===[ SHOW PASSWORD TOGGLE ]====
+  void showPasswordToggle() {
+    showPassword = !showPassword;
+  }
+
+  ///
+
+  //? ===[ BOX DECORATION ]====
+  BoxDecoration _buildBackgroundImage() {
+    return const BoxDecoration(
+      image: DecorationImage(
+        image: AssetImage('assets/sys_image/ast_landing_bg.jpg'),
+        fit: BoxFit.cover,
+        alignment: Alignment.center,
+        opacity: 0.4,
+      ),
+    );
+  }
+
+  ///
+
+  //? ===[ RESET FORM ]====
+  void resetForm() {
+    nameController.clear();
+    emailController.clear();
+    passwordController.clear();
+    confirmPasswordController.clear();
+  }
+
+  ///
+
+  //? ===[ SHOW LOADING DIALOG ]====
   void showLoading(String? title, String? subtitle) {
     Get.defaultDialog(
       title: '$title',
@@ -413,6 +411,9 @@ mixin SignUpFormController {
     );
   }
 
+  ///
+
+  //? ===[ SHOW FAILED DIALOG ]====
   void showFailedDialog(title, message) {
     Get.defaultDialog(
       title: title,
@@ -428,6 +429,9 @@ mixin SignUpFormController {
     );
   }
 
+  ///
+
+  //? ===[ SHOW SUCCESS DIALOG ]====
   void showSuccessDialog(title, message) {
     Get.snackbar(
       title,
@@ -435,5 +439,42 @@ mixin SignUpFormController {
       colorText: Colors.black,
       margin: const EdgeInsets.all(10),
     );
+  }
+
+  ///
+  ///=======================================================================================================
+  ///
+
+  void registerCredentials() async {
+    if (!formKey.currentState!.validate()) {
+      return;
+    }
+
+    var user = UserModel(
+      name: nameController.text,
+      email: emailController.text,
+      password: passwordController.text,
+      confirm_password: confirmPasswordController.text,
+    );
+
+    showLoading('Registering', 'Please wait...');
+    var response = await SignupApi.auth.register(user);
+    Get.close(1);
+
+    if (response == "Cannot connect to server") {
+      showFailedDialog('Failed', response);
+      return;
+    }
+
+    if (response == "Email already exists") {
+      emailExistError = "Invalid. Email is already exists";
+      !formKey.currentState!.validate();
+      return;
+    }
+
+    if (response == "Registration successful") {
+      showSuccessDialog('Success', 'Registered successfully!');
+      resetForm();
+    }
   }
 }

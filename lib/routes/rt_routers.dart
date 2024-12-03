@@ -235,7 +235,7 @@ class AppRoute {
           children: [
             GetPage(
               name: RouteSetting.myProfile.name,
-              page: () => MyProfileScreen(),
+              page: () => const MyProfileScreen(),
               preventDuplicates: true,
             ),
           ],

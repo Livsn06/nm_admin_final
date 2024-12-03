@@ -8,7 +8,7 @@ import '../../global/gb_variables.dart';
 import '../../models/response/md_response.dart';
 
 class ApiUser {
-  static Future<ResponseModel> fetchAllUser() async {
+  static Future<List<UserModel>?> fetchAllUser() async {
     String base = API_BASE.value;
     String url = '$base/api/v1/users';
     String? token = await SessionAccess.instance.getSessionToken();
@@ -23,24 +23,21 @@ class ApiUser {
       var response = await http.get(Uri.parse(url), headers: headers);
 
       //
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      if (response.statusCode == 200) {
         log('User fetched successfully', name: 'API ALL USER');
         final result = jsonDecode(response.body);
-        return ResponseModel.dataListFromJson(result, success: true);
+        return UserModel.listFromJson(result['data']);
       }
 
       log(response.statusCode.toString(), name: 'API ALL USER ERROR');
       final result = jsonDecode(response.body);
-      return ResponseModel.errorFromJson(result, success: false);
+      return null;
 
       //
     } catch (e) {
       log(e.toString(), name: 'API ALL USER CLIENT ERROR');
-      return ResponseModel.clientErrorFromJson(
-        message: 'Cannot connect to server',
-        success: false,
-      );
     }
+    return null;
   }
 
   //====================
@@ -81,9 +78,9 @@ class ApiUser {
   }
 
   //======================
-  static Future<ResponseModel> fetchRoleUser(String role) async {
+  static Future<List<UserModel>?> fetchRoleUser(String role) async {
     String base = API_BASE.value;
-    String url = '$base/api/v1/users/$role/type';
+    String url = '$base/api/v1/users/$role/role';
     String? token = await SessionAccess.instance.getSessionToken();
 
     var headers = {
@@ -96,25 +93,21 @@ class ApiUser {
       var response = await http.get(Uri.parse(url), headers: headers);
 
       //
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        log('User with role fetched successfully', name: 'API USER BY ROLE');
-
+      if (response.statusCode == 200) {
+        log('User role fetched successfully', name: 'API USER BY ROLE');
         final result = jsonDecode(response.body);
-        return ResponseModel.dataListFromJson(result, success: true);
+        return UserModel.listFromJson(result['data']);
       }
 
       log(response.statusCode.toString(), name: 'API USER BY ROLE ERROR');
       final result = jsonDecode(response.body);
-      return ResponseModel.errorFromJson(result, success: false);
+      return null;
 
       //
     } catch (e) {
       log(e.toString(), name: 'API USER BY ROLE CLIENT ERROR');
-      return ResponseModel.clientErrorFromJson(
-        message: 'Cannot connect to server',
-        success: false,
-      );
     }
+    return null;
   }
 
   //==================================

@@ -235,7 +235,8 @@ mixin LoginFormController {
   final formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  ErrorModel? error;
+  String? emailNotFoundError;
+  String? wrongPasswordError;
   bool showPassword = false;
   Future<void> loginCredentials() async {
     if (!formKey.currentState!.validate()) {
@@ -251,26 +252,30 @@ mixin LoginFormController {
     var response = await LoginApi.auth.login(user);
     Get.close(1);
 
-    if (response.clientError ?? false) {
-      showFailedDialog('Failed', 'Something went wrong!');
+    if (response == 'Cannot connect to server') {
+      showFailedDialog('Failed', response);
       return;
     }
 
-    if (response.success == false && response.errors != null) {
-      error = ErrorModel.fromJson(response.errors!);
-      formKey.currentState!.validate();
-      error = null;
+    if (response == 'Email not found') {
+      emailNotFoundError = "Invalid. Email does not exist";
+      !formKey.currentState!.validate();
       return;
     }
 
-    if (response.success == true && response.data != null) {
-      //
-      var admin = UserModel.fromJson(response.data!);
+    if (response == 'Invalid password') {
+      wrongPasswordError = "Invalid. Password is incorrect";
+      !formKey.currentState!.validate();
+      return;
+    }
 
+    if ((response as UserModel).access_token != null) {
       //
+      var admin = response;
+
       showLoading('Session', 'Please wait...');
-      print(response.token);
-      await SessionAccess.instance.createSession(admin, response.token!);
+      print(admin.access_token);
+      await SessionAccess.instance.createSession(admin);
       Get.close(1);
       html.window.location.reload();
       //
@@ -295,8 +300,8 @@ mixin LoginFormController {
     if (!GetUtils.isEmail(value)) {
       return 'Invalid. Please enter a valid email address';
     }
-    if (error?.email != null) {
-      return error?.email;
+    if (emailNotFoundError != null) {
+      return emailNotFoundError;
     }
     return null;
   }
@@ -305,8 +310,8 @@ mixin LoginFormController {
     if (value == null || value.isEmpty) {
       return 'Required. Please enter a password';
     }
-    if (error?.password != null) {
-      return error?.password;
+    if (wrongPasswordError != null) {
+      return emailNotFoundError;
     }
     return null;
   }

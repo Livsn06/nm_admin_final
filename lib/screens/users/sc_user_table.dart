@@ -174,7 +174,7 @@ class _UserTableScreenState extends State<UserTableScreen> {
                         : _loadingImage(user.avatar!),
                   ),
                   title: Text(
-                    '${user.firstname} ${user.lastname}',
+                    '${user.name}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text('${user.email}'),

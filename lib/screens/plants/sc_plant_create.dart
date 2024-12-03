@@ -3,21 +3,25 @@ import 'dart:typed_data';
 
 import 'package:admin/api/image/api_image.dart';
 import 'package:admin/api/plant/api_plant.dart';
+import 'package:admin/controllers/ct_ailment.dart';
 import 'package:admin/models/form/md_form_image.dart';
 import 'package:admin/models/plant/md_plant.dart';
 import 'package:admin/models/plant/md_plant_local_name.dart';
 import 'package:admin/models/plant/md_plant_treatment.dart';
-import 'package:admin/models/remedies/md_ailment.dart';
-import 'package:admin/models/response/md_response.dart';
+
 import 'package:admin/routes/rt_routers.dart';
 import 'package:admin/sessions/sn_access.dart';
 import 'package:admin/sessions/sn_plant.dart';
 import 'package:admin/widgets/wg_appbar.dart';
+import 'package:admin/widgets/wg_dropdown.dart';
+import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'dart:html' as html;
 
 import 'package:get/get.dart';
+
+import '../../models/ailments/md_ailment.dart';
 
 class PlantCreateScreen extends StatefulWidget with FormFuntionality {
   PlantCreateScreen({super.key});
@@ -27,6 +31,8 @@ class PlantCreateScreen extends StatefulWidget with FormFuntionality {
 }
 
 class _PlantCreateScreenState extends State<PlantCreateScreen> {
+  final AilmentController ailmentController = Get.put(AilmentController());
+
   @override
   void initState() {
     super.initState();
@@ -165,6 +171,77 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
     );
   }
 
+  void _buildViewModal(title) {
+    Get.defaultDialog(
+      barrierDismissible: true,
+      titlePadding: const EdgeInsets.all(10),
+      contentPadding: const EdgeInsets.all(20),
+      title: '$title',
+      content: SizedBox(
+        width: 500,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            _buildTextFieldForm(
+              label: 'Title',
+              isReadOnly: true,
+              controller: widget.modalTitleController,
+            ),
+            const Gap(20),
+            _buildTextFieldForm(
+              label: 'Description',
+              isReadOnly: true,
+              controller: widget.modalDescriptionController,
+              is_Multiline: true,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  //ADD AILMENT MODAL
+
+  void _buildModalAddAilment(title,
+      {required Function()? onCancel, required Function()? onAdd}) {
+    Get.defaultDialog(
+      barrierDismissible: false,
+      titlePadding: const EdgeInsets.all(10),
+      contentPadding: const EdgeInsets.all(20),
+      title: '$title',
+      content: SizedBox(
+        width: 500,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            customDropDown(
+              controller: widget.ailmentController.value,
+              dataValue: ailmentController.data.value,
+              hintText: 'Select Ailment',
+            ),
+            const Gap(15),
+            Row(
+              children: [
+                const Spacer(),
+                _buildCustomButton(
+                  Colors.red,
+                  title: 'Close',
+                  onTap: onCancel,
+                ),
+                const Gap(30),
+                _buildCustomButton(
+                  const Color(0xFF007E62),
+                  title: 'Add',
+                  onTap: onAdd,
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
   void _buildModalLocalNameAdd(title,
       {required Function()? onCancel, required Function()? onAdd}) {
     Get.defaultDialog(
@@ -187,7 +264,7 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
                 const Spacer(),
                 _buildCustomButton(
                   Colors.red,
-                  title: 'Cancel',
+                  title: 'Close',
                   onTap: onCancel,
                 ),
                 const Gap(30),
@@ -198,6 +275,28 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
                 ),
               ],
             )
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _buildModalLocalNameView(title) {
+    Get.defaultDialog(
+      barrierDismissible: true,
+      titlePadding: const EdgeInsets.all(10),
+      contentPadding: const EdgeInsets.all(20),
+      title: '$title',
+      content: SizedBox(
+        width: 500,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            _buildTextFieldForm(
+              label: 'Local name',
+              isReadOnly: true,
+              controller: widget.modalLocalNameController,
+            ),
           ],
         ),
       ),
@@ -218,31 +317,30 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
               _buildAddButton(
                 title: 'Add Ailment',
                 onAdd: () {
-                  _buildModalAdd(
+                  _buildModalAddAilment(
                     'Add Ailment',
                     onCancel: () {
-                      widget.modalDescriptionController.clear();
-                      widget.modalTitleController.clear();
-                      Get.close(1);
+                      Get.back();
                     },
                     onAdd: () {
-                      if (widget.modalTitleController.text.trim().isEmpty ||
-                          widget.modalDescriptionController.text
-                              .trim()
-                              .isEmpty) {
-                        return;
+                      if (widget.ailmentController.value.dropDownValue !=
+                          null) {
+                        var value = widget
+                            .ailmentController.value.dropDownValue!.value!;
+                        setState(() {
+                          widget.ailments.add(value);
+
+                          widget.ailmentController.value.dropDownValue = null;
+                          Get.snackbar(
+                            'Added',
+                            '${value.name} added successfully.',
+                            backgroundColor:
+                                const Color.fromARGB(151, 76, 175, 79),
+                            colorText: Colors.white,
+                            duration: const Duration(seconds: 1),
+                          );
+                        });
                       }
-                      widget.ailments.add(
-                        PlantTreatmentModel(
-                          name: widget.modalTitleController.text,
-                          description: widget.modalDescriptionController.text,
-                        ),
-                      );
-                      setState(() {
-                        widget.modalDescriptionController.clear();
-                        widget.modalTitleController.clear();
-                        Get.close(1);
-                      });
                     },
                   );
                 },
@@ -276,26 +374,7 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
                     widget.modalTitleController.text = ailment.name!;
                     widget.modalDescriptionController.text =
                         ailment.description!;
-
-                    _buildModalAdd(
-                      'Edit Ailment',
-                      onCancel: () {
-                        widget.modalDescriptionController.clear();
-                        widget.modalTitleController.clear();
-                        Get.close(1);
-                      },
-                      onAdd: () {
-                        widget.ailments[index] = PlantTreatmentModel(
-                          name: widget.modalTitleController.text,
-                          description: widget.modalDescriptionController.text,
-                        );
-                        setState(() {
-                          widget.modalDescriptionController.clear();
-                          widget.modalTitleController.clear();
-                          Get.close(1);
-                        });
-                      },
-                    );
+                    _buildViewModal('Ailment Information');
                   },
                   child: Chip(
                     padding: const EdgeInsets.all(10),
@@ -331,14 +410,15 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
               _buildAddButton(
                 title: 'Add Local Name',
                 onAdd: () {
+                  widget.modalLocalNameController.clear();
                   _buildModalLocalNameAdd('Add Local Name', onCancel: () {
-                    widget.modalLocalNameController.clear();
                     Get.close(1);
+                    widget.modalLocalNameController.clear();
                   }, onAdd: () {
-                    widget.localNames.add(widget.modalLocalNameController.text);
                     setState(() {
+                      widget.localNames
+                          .add(widget.modalLocalNameController.text);
                       widget.modalLocalNameController.clear();
-                      Get.close(1);
                     });
                   });
                 },
@@ -357,7 +437,7 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 1,
                 crossAxisSpacing: 5,
-                mainAxisSpacing: 10,
+                mainAxisSpacing: 4,
                 childAspectRatio: widget.localNames.isEmpty ? 1 / 8 : 2 / 6,
               ),
               itemBuilder: (context, index) {
@@ -371,21 +451,7 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
                 return InkWell(
                   onTap: () {
                     widget.modalLocalNameController.text = name;
-                    _buildModalLocalNameAdd(
-                      'Edit Local Name',
-                      onCancel: () {
-                        widget.modalLocalNameController.clear();
-                        Get.close(1);
-                      },
-                      onAdd: () {
-                        widget.localNames[index] =
-                            widget.modalLocalNameController.text;
-                        setState(() {
-                          widget.modalLocalNameController.clear();
-                          Get.close(1);
-                        });
-                      },
-                    );
+                    _buildModalLocalNameView('Local Name');
                   },
                   child: Chip(
                     padding: const EdgeInsets.all(10),
@@ -542,11 +608,11 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
                 flex: 4,
                 child: _buildBasicInfoForm(),
               ),
-              const Gap(40),
-              Expanded(
-                flex: 1,
-                child: _buildCoverForm(),
-              ),
+              // const Gap(40),
+              // Expanded(
+              //   flex: 1,
+              //   child: _buildCoverForm(),
+              // ),
             ],
           ),
         ],
@@ -580,84 +646,84 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
     );
   }
 
-  Widget _buildCoverForm() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        InkWell(
-          onTap: () {
-            if (widget.coverImage.value != null) {
-              widget.showImagePicture(image: widget.coverImage.value!);
-            }
-          },
-          child: Obx(() {
-            return Container(
-              width: 200,
-              height: 200,
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(10)),
-                  border: Border.all(
-                    color: const Color.fromARGB(255, 101, 101, 101),
-                    width: 2,
-                  )),
-              child: widget.coverImage.value != null
-                  ? Image.memory(
-                      widget.coverImage.value!.bytes!,
-                      fit: BoxFit.cover,
-                    )
-                  : const Icon(
-                      Icons.image,
-                      size: 200,
-                      color: Color(0x49007E63),
-                    ),
-            );
-          }),
-        ),
-        const Gap(20),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xAEE9FCF8),
-            shape: RoundedRectangleBorder(
-              side: const BorderSide(color: Color(0xFF007E62), width: 2),
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          onPressed: () {
-            widget.pickCoverImage();
-          },
-          child: const Text(
-            'Cover Image',
-            style: TextStyle(
-              fontSize: 12,
-              color: Color(0xFF007E62),
-            ),
-          ),
-        ),
-        const Gap(10),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFFFDED4),
-            shape: RoundedRectangleBorder(
-              side: const BorderSide(color: Color(0xFF7E1D00), width: 2),
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          onPressed: () {
-            widget.coverImage.value = null;
-          },
-          child: const Text(
-            'Clear',
-            style: TextStyle(
-              fontSize: 12,
-              color: Color(0xFF7E1D00),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  // Widget _buildCoverForm() {
+  //   return Column(
+  //     mainAxisSize: MainAxisSize.min,
+  //     crossAxisAlignment: CrossAxisAlignment.stretch,
+  //     children: [
+  //       InkWell(
+  //         onTap: () {
+  //           if (widget.coverImage.value != null) {
+  //             widget.showImagePicture(image: widget.coverImage.value!);
+  //           }
+  //         },
+  //         child: Obx(() {
+  //           return Container(
+  //             width: 200,
+  //             height: 200,
+  //             padding: const EdgeInsets.all(4),
+  //             decoration: BoxDecoration(
+  //                 borderRadius: const BorderRadius.all(Radius.circular(10)),
+  //                 border: Border.all(
+  //                   color: const Color.fromARGB(255, 101, 101, 101),
+  //                   width: 2,
+  //                 )),
+  //             child: widget.coverImage.value != null
+  //                 ? Image.memory(
+  //                     widget.coverImage.value!.bytes!,
+  //                     fit: BoxFit.cover,
+  //                   )
+  //                 : const Icon(
+  //                     Icons.image,
+  //                     size: 200,
+  //                     color: Color(0x49007E63),
+  //                   ),
+  //           );
+  //         }),
+  //       ),
+  //       const Gap(20),
+  //       ElevatedButton(
+  //         style: ElevatedButton.styleFrom(
+  //           backgroundColor: const Color(0xAEE9FCF8),
+  //           shape: RoundedRectangleBorder(
+  //             side: const BorderSide(color: Color(0xFF007E62), width: 2),
+  //             borderRadius: BorderRadius.circular(10),
+  //           ),
+  //         ),
+  //         onPressed: () {
+  //           widget.pickCoverImage();
+  //         },
+  //         child: const Text(
+  //           'Cover Image',
+  //           style: TextStyle(
+  //             fontSize: 12,
+  //             color: Color(0xFF007E62),
+  //           ),
+  //         ),
+  //       ),
+  //       const Gap(10),
+  //       ElevatedButton(
+  //         style: ElevatedButton.styleFrom(
+  //           backgroundColor: const Color(0xFFFFDED4),
+  //           shape: RoundedRectangleBorder(
+  //             side: const BorderSide(color: Color(0xFF7E1D00), width: 2),
+  //             borderRadius: BorderRadius.circular(10),
+  //           ),
+  //         ),
+  //         onPressed: () {
+  //           widget.coverImage.value = null;
+  //         },
+  //         child: const Text(
+  //           'Clear',
+  //           style: TextStyle(
+  //             fontSize: 12,
+  //             color: Color(0xFF7E1D00),
+  //           ),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _buildFormTitle({title}) {
     return Container(
@@ -703,41 +769,44 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
 mixin FormFuntionality {
   RxBool successUpload = false.obs;
   final formKey = GlobalKey<FormState>();
+
   final plantNameController = TextEditingController();
   final plantScientificNameController = TextEditingController();
   final plantDescriptionController = TextEditingController();
   final modalTitleController = TextEditingController();
   final modalDescriptionController = TextEditingController();
   final modalLocalNameController = TextEditingController();
+  Rx<SingleValueDropDownController> ailmentController =
+      Rx<SingleValueDropDownController>(SingleValueDropDownController());
 
   //
-  final Rx<FormImageModel?> coverImage = Rx<FormImageModel?>(null);
+
   final List<String> localNames = [];
-  final List<PlantTreatmentModel> ailments = [];
+  final List<AilmentModel> ailments = [];
   final RxList<FormImageModel> otherImages = RxList<FormImageModel>([]);
   final RxString progressMessage = ''.obs;
   final RxBool isEditMode = false.obs;
 
-  void pickCoverImage() {
-    html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-    uploadInput.accept = 'image/jpeg,image/png,image/jpg';
-    uploadInput.click();
+  // void pickCoverImage() {
+  //   html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+  //   uploadInput.accept = 'image/jpeg,image/png,image/jpg';
+  //   uploadInput.click();
 
-    uploadInput.onChange.listen((e) async {
-      final files = uploadInput.files;
-      if (files!.isNotEmpty) {
-        var reader = html.FileReader();
-        reader.readAsArrayBuffer(files[0]);
+  //   uploadInput.onChange.listen((e) async {
+  //     final files = uploadInput.files;
+  //     if (files!.isNotEmpty) {
+  //       var reader = html.FileReader();
+  //       reader.readAsArrayBuffer(files[0]);
 
-        await reader.onLoad.first;
-        coverImage.value = FormImageModel(
-          name: files[0].name,
-          file: files[0],
-          bytes: reader.result as Uint8List,
-        );
-      }
-    });
-  }
+  //       await reader.onLoad.first;
+  //       coverImage.value = FormImageModel(
+  //         name: files[0].name,
+  //         file: files[0],
+  //         bytes: reader.result as Uint8List,
+  //       );
+  //     }
+  //   });
+  // }
 
   void showImagePicture({required FormImageModel image}) {
     Get.defaultDialog(
@@ -812,7 +881,6 @@ mixin FormFuntionality {
     plantDescriptionController.clear();
     modalTitleController.clear();
     modalDescriptionController.clear();
-    coverImage.value = null;
     otherImages.clear();
     ailments.clear();
     html.window.location.reload();
@@ -822,7 +890,6 @@ mixin FormFuntionality {
     if (plantNameController.text.isEmpty &&
         plantDescriptionController.text.isEmpty &&
         plantScientificNameController.text.isEmpty &&
-        coverImage.value == null &&
         otherImages.value.isEmpty &&
         ailments.isEmpty) {
       Get.offNamed(CustomRoute.path.plantsTable);
@@ -876,16 +943,16 @@ mixin FormFuntionality {
       return;
     }
 
-    if (coverImage.value == null) {
-      Get.snackbar(
-        padding: const EdgeInsets.all(10),
-        'Cover',
-        'Please select an cover image.',
-        backgroundColor: const Color(0xFFFFD4D4),
-        colorText: Colors.black,
-      );
-      return;
-    }
+    // if (coverImage.value == null) {
+    //   Get.snackbar(
+    //     padding: const EdgeInsets.all(10),
+    //     'Cover',
+    //     'Please select an cover image.',
+    //     backgroundColor: const Color(0xFFFFD4D4),
+    //     colorText: Colors.black,
+    //   );
+    //   return;
+    // }
 
     if (otherImages.isEmpty) {
       Get.snackbar(
@@ -958,16 +1025,16 @@ mixin FormFuntionality {
       return;
     }
 
-    if (coverImage.value == null) {
-      Get.snackbar(
-        padding: const EdgeInsets.all(10),
-        'Cover',
-        'Please select an cover image.',
-        backgroundColor: const Color(0xFFFFD4D4),
-        colorText: Colors.black,
-      );
-      return;
-    }
+    // if (coverImage.value == null) {
+    //   Get.snackbar(
+    //     padding: const EdgeInsets.all(10),
+    //     'Cover',
+    //     'Please select an cover image.',
+    //     backgroundColor: const Color(0xFFFFD4D4),
+    //     colorText: Colors.black,
+    //   );
+    //   return;
+    // }
 
     if (otherImages.isEmpty) {
       Get.snackbar(
@@ -1025,7 +1092,7 @@ mixin FormFuntionality {
           textColor: Colors.white,
           onPressed: () {
             Get.close(1);
-            updateForm();
+            // updateForm();
           },
           child: const Text('Proceed'),
         ),
@@ -1106,25 +1173,24 @@ mixin FormFuntionality {
         plantScientificNameController.text = plant.scientific_name!;
 
         //
-        var value = await ApiImage.getImage(plant.cover!);
-        if (value != null) {
-          coverImage.value = FormImageModel(
-            name: value.file_name,
-            bytes: value.image_data,
-          );
-        } else {
-          coverImage.value = null;
-        }
+        // var value = await ApiImage.getImage(plant.images![0]);
+        // if (value != null) {
+        //   coverImage.value = FormImageModel(
+        //     name: value.file_name,
+        //     bytes: value.image_data,
+        //   );
+        // } else {
+        //   coverImage.value = null;
+        // }
 
         //
         if (plant.images != null) {
           for (var i = 0; i < plant.images!.length; i++) {
-            print(plant.images![i].path);
-            var value = await ApiImage.getImage(plant.images![i].path!);
+            print(plant.images![i]);
+            var value = await ApiImage.getImage(plant.images![i]);
             if (value != null) {
               otherImages.add(
                 FormImageModel(
-                  id: plant.images![i].id,
                   name: value.file_name,
                   bytes: value.image_data,
                 ),
@@ -1135,17 +1201,17 @@ mixin FormFuntionality {
 
         //
 
-        if (plant.ailments != null) {
-          for (var ailment in plant.ailments!) {
-            print(ailment.name);
-            ailments.add(ailment);
-          }
-        }
+        // if (plant.ailments != null) {
+        //   for (var ailment in plant.ailments!) {
+        //     print(ailment.name);
+        //     ailments.add(ailment);
+        //   }
+        // }
 
         //
         if (plant.local_name != null) {
           for (var i = 0; i < plant.local_name!.length; i++) {
-            localNames.add(plant.local_name![i].name!);
+            localNames.add(plant.local_name![i]);
           }
         }
       }
@@ -1173,274 +1239,196 @@ mixin FormFuntionality {
       name: plantNameController.text,
       description: plantDescriptionController.text,
       scientific_name: plantScientificNameController.text,
-      create_by: user,
+      local_name: localNames[0],
+      status: 'active',
+      uploader_id: user.id,
     );
 
     progressMessage.value = 'Uploading your plant...';
     loadingModal(title: 'Creating Plant');
-    var response = await ApiPlant.uploadPlant(plant: plant);
+    var response =
+        await ApiPlant.uploadPlant(plant: plant, images: otherImages.value);
 
-    if (response.success == false || response.errors != null) {
+    if (response == null) {
       Get.close(1);
       failedModal(title: 'Failed', subtitle: 'Failed to create plant');
       return;
     }
 
-    if (response.clientError ?? false) {
-      Get.close(1);
-      failedModal(title: 'Failed', subtitle: response.message!);
-      return;
-    }
-    //
-    var plantUploaded = PlantModel.fromJson(response.data!);
-    if (plantUploaded.id == null) {
-      Get.close(1);
-      failedModal(
-        title: 'Program Failed',
-        subtitle: 'Could not fetch the plant id.',
-      );
-      return;
-    }
-
-    print('Plant ID: ${plantUploaded.id}');
+    print('Plant ID: ${response.id}');
     //--------------------------------------------------------------
     progressMessage.value = 'Uploading treatments...';
     for (var ailment in ailments) {
       //
       var configAilment = PlantTreatmentModel(
-        name: ailment.name,
-        description: ailment.description,
-        plant_id: plantUploaded.id,
+        plant: response,
+        ailment: ailment,
       );
-      var response = await ApiPlant.uploadTeatment(configAilment);
 
-      if (response.success == false || response.errors != null) {
+      var response2 = await ApiPlant.uploadTeatment(configAilment);
+
+      if (response2 == null) {
         Get.close(1);
         failedModal(title: 'Failed', subtitle: 'Failed to create ailment');
         return;
       }
 
-      if (response.clientError ?? false) {
-        Get.close(1);
-        failedModal(title: 'Failed', subtitle: response.message!);
-        return;
-      }
-    }
-
-    //--------------------------------------------------------------
-    progressMessage.value = 'Uploading local names...';
-    for (var lcName in localNames) {
-      //
-      var configLCN = PlantLocalNameModel(
-        name: lcName,
-        plant_id: plantUploaded.id,
-      );
-      var response = await ApiPlant.uploadLocalName(configLCN);
-
-      if (response.success == false || response.errors != null) {
-        Get.close(1);
-        failedModal(title: 'Failed', subtitle: 'Failed to create local names');
-        return;
-      }
-
-      if (response.clientError ?? false) {
-        Get.close(1);
-        failedModal(title: 'Failed', subtitle: response.message!);
-        return;
-      }
-    }
-
-    //--------------------------------------------------------------
-    progressMessage.value = 'Uploading images...';
-    response = await ApiPlant.uploadCover(plantUploaded, coverImage.value!);
-
-    if (response.success == false || response.errors != null) {
+      print('Ailment ID: ${response2.id}');
       Get.close(1);
-      failedModal(title: 'Failed', subtitle: 'Failed to upload cover image');
-      return;
+      successModal(title: 'Success', subtitle: 'Plant created successfully');
+      isSuccess = true;
     }
-
-    if (response.clientError ?? false) {
-      Get.close(1);
-      failedModal(title: 'Failed', subtitle: response.message!);
-      return;
-    }
-
-    //--------------------------------------------------------------
-
-    for (var image in otherImages) {
-      response = await ApiPlant.uploadImage(plantUploaded, image);
-
-      if (response.success == false || response.errors != null) {
-        Get.close(1);
-        failedModal(title: 'Failed', subtitle: 'Failed to upload image');
-        return;
-      }
-
-      if (response.clientError ?? false) {
-        Get.close(1);
-        failedModal(title: 'Failed', subtitle: response.message!);
-        return;
-      }
-    }
-
-    Get.close(1);
-    successModal(title: 'Success', subtitle: 'Plant uploaded successfully');
   }
 
-  ///
+  // void updateForm() async {
+  //   try {
+  //     bool isSuccess = false;
 
-  void updateForm() async {
-    try {
-      bool isSuccess = false;
+  //     var user = await SessionAccess.instance.getSessionData();
+  //     var oldPlant = await SessionPlant.getEditPlant();
 
-      var user = await SessionAccess.instance.getSessionData();
-      var oldPlant = await SessionPlant.getEditPlant();
+  //     // -----------------------------------------------
+  //     if (oldPlant == null) {
+  //       Get.close(1);
+  //       failedModal(title: 'Failed', subtitle: 'Plant not found');
+  //       return;
+  //     }
 
-      // -----------------------------------------------
-      if (oldPlant == null) {
-        Get.close(1);
-        failedModal(title: 'Failed', subtitle: 'Plant not found');
-        return;
-      }
+  //     //
+  //     if (user.id == null) {
+  //       Get.close(1);
+  //       failedModal(title: 'Failed', subtitle: 'User not found');
+  //       return;
+  //     }
 
-      //
-      if (user.id == null) {
-        Get.close(1);
-        failedModal(title: 'Failed', subtitle: 'User not found');
-        return;
-      }
+  //     var plant = PlantModel(
+  //       id: oldPlant.id,
+  //       name: plantNameController.text,
+  //       description: plantDescriptionController.text,
+  //       scientific_name: plantScientificNameController.text,
+  //     );
 
-      var plant = PlantModel(
-        id: oldPlant.id,
-        name: plantNameController.text,
-        description: plantDescriptionController.text,
-        scientific_name: plantScientificNameController.text,
-        update_by: user,
-        create_by: user,
-      );
+  //     progressMessage.value = 'Updating your plant...';
+  //     loadingModal(title: 'Updating Plant');
 
-      progressMessage.value = 'Updating your plant...';
-      loadingModal(title: 'Updating Plant');
+  //     var response = await ApiPlant.updatePlant(plant: plant);
 
-      var response = await ApiPlant.updatePlant(plant: plant);
+  //     if (response.success == false || response.errors != null) {
+  //       Get.close(1);
+  //       failedModal(title: 'Failed', subtitle: 'Failed to update plant');
+  //       return;
+  //     }
 
-      if (response.success == false || response.errors != null) {
-        Get.close(1);
-        failedModal(title: 'Failed', subtitle: 'Failed to update plant');
-        return;
-      }
+  //     if (response.clientError ?? false) {
+  //       Get.close(1);
+  //       failedModal(title: 'Failed', subtitle: response.message!);
+  //       return;
+  //     }
 
-      if (response.clientError ?? false) {
-        Get.close(1);
-        failedModal(title: 'Failed', subtitle: response.message!);
-        return;
-      }
+  //     //--------------------------------------------------------------
+  //     progressMessage.value = 'Updating treatments...';
 
-      //--------------------------------------------------------------
-      progressMessage.value = 'Updating treatments...';
+  //     if (ailments.isNotEmpty) {
+  //       //
 
-      if (ailments.isNotEmpty) {
-        //
+  //       await ApiPlant.clearTreatments(oldPlant.id!);
 
-        await ApiPlant.clearTreatments(oldPlant.id!);
+  //       for (var ailment in ailments) {
+  //         //
+  //         var configAilment = PlantTreatmentModel(
+  //           name: ailment.name,
+  //           description: ailment.description,
+  //           plant_id: oldPlant.id,
+  //         );
 
-        for (var ailment in ailments) {
-          //
-          var configAilment = PlantTreatmentModel(
-            name: ailment.name,
-            description: ailment.description,
-            plant_id: oldPlant.id,
-          );
+  //         response = await ApiPlant.uploadTeatment(configAilment);
 
-          response = await ApiPlant.uploadTeatment(configAilment);
+  //         if (response.success == false || response.errors != null) {
+  //           Get.close(1);
+  //           failedModal(title: 'Failed', subtitle: 'Failed to update ailment');
+  //           return;
+  //         }
 
-          if (response.success == false || response.errors != null) {
-            Get.close(1);
-            failedModal(title: 'Failed', subtitle: 'Failed to update ailment');
-            return;
-          }
+  //         if (response.clientError ?? false) {
+  //           Get.close(1);
+  //           failedModal(title: 'Failed', subtitle: response.message!);
+  //           return;
+  //         }
+  //       }
+  //     }
 
-          if (response.clientError ?? false) {
-            Get.close(1);
-            failedModal(title: 'Failed', subtitle: response.message!);
-            return;
-          }
-        }
-      }
+  //     //--------------------------------------------------------------
+  //     progressMessage.value = 'Updating local names...';
+  //     if (localNames.isNotEmpty) {
+  //       await ApiPlant.clearLocalNames(oldPlant);
+  //     }
+  //     for (var lcName in localNames) {
+  //       //
+  //       var configLCN = PlantLocalNameModel(
+  //         name: lcName,
+  //         plant_id: oldPlant.id,
+  //       );
+  //       var response = await ApiPlant.uploadLocalName(configLCN);
 
-      //--------------------------------------------------------------
-      progressMessage.value = 'Updating local names...';
-      if (localNames.isNotEmpty) {
-        await ApiPlant.clearLocalNames(oldPlant);
-      }
-      for (var lcName in localNames) {
-        //
-        var configLCN = PlantLocalNameModel(
-          name: lcName,
-          plant_id: oldPlant.id,
-        );
-        var response = await ApiPlant.uploadLocalName(configLCN);
+  //       if (response.success == false || response.errors != null) {
+  //         Get.close(1);
+  //         failedModal(
+  //             title: 'Failed', subtitle: 'Failed to update local names');
+  //         return;
+  //       }
 
-        if (response.success == false || response.errors != null) {
-          Get.close(1);
-          failedModal(
-              title: 'Failed', subtitle: 'Failed to update local names');
-          return;
-        }
+  //       if (response.clientError ?? false) {
+  //         Get.close(1);
+  //         failedModal(title: 'Failed', subtitle: response.message!);
+  //         return;
+  //       }
+  //     }
 
-        if (response.clientError ?? false) {
-          Get.close(1);
-          failedModal(title: 'Failed', subtitle: response.message!);
-          return;
-        }
-      }
+  //     //--------------------------------------------------------------
+  //     progressMessage.value = 'Updating images...';
 
-      //--------------------------------------------------------------
-      progressMessage.value = 'Updating images...';
+  //     if (otherImages.value.isNotEmpty) {
+  //       await ApiPlant.clearImages(oldPlant);
+  //     }
 
-      if (otherImages.value.isNotEmpty) {
-        await ApiPlant.clearImages(oldPlant);
-      }
+  //     response = await ApiPlant.uploadCover(oldPlant, coverImage.value!);
 
-      response = await ApiPlant.uploadCover(oldPlant, coverImage.value!);
+  //     if (response.success == false || response.errors != null) {
+  //       Get.close(1);
+  //       failedModal(title: 'Failed', subtitle: 'Failed to update cover image');
+  //       return;
+  //     }
 
-      if (response.success == false || response.errors != null) {
-        Get.close(1);
-        failedModal(title: 'Failed', subtitle: 'Failed to update cover image');
-        return;
-      }
+  //     if (response.clientError ?? false) {
+  //       Get.close(1);
+  //       failedModal(title: 'Failed', subtitle: response.message!);
+  //       return;
+  //     }
 
-      if (response.clientError ?? false) {
-        Get.close(1);
-        failedModal(title: 'Failed', subtitle: response.message!);
-        return;
-      }
+  //     //--------------------------------------------------------------
 
-      //--------------------------------------------------------------
+  //     for (var image in otherImages) {
+  //       response = await ApiPlant.uploadImage(oldPlant, image);
 
-      for (var image in otherImages) {
-        response = await ApiPlant.uploadImage(oldPlant, image);
+  //       if (response.success == false || response.errors != null) {
+  //         Get.close(1);
+  //         failedModal(title: 'Failed', subtitle: 'Failed to update image');
+  //         return;
+  //       }
 
-        if (response.success == false || response.errors != null) {
-          Get.close(1);
-          failedModal(title: 'Failed', subtitle: 'Failed to update image');
-          return;
-        }
+  //       if (response.clientError ?? false) {
+  //         Get.close(1);
+  //         failedModal(title: 'Failed', subtitle: response.message!);
+  //         return;
+  //       }
+  //     }
 
-        if (response.clientError ?? false) {
-          Get.close(1);
-          failedModal(title: 'Failed', subtitle: response.message!);
-          return;
-        }
-      }
-
-      Get.close(1);
-      successModal(title: 'Success', subtitle: 'Plant updated successfully');
-    } catch (e) {
-      Get.close(1);
-      failedModal(title: 'Failed', subtitle: 'Failed to update plant');
-      printError(info: e.toString());
-    }
-  }
+  //     Get.close(1);
+  //     successModal(title: 'Success', subtitle: 'Plant updated successfully');
+  //   } catch (e) {
+  //     Get.close(1);
+  //     failedModal(title: 'Failed', subtitle: 'Failed to update plant');
+  //     printError(info: e.toString());
+  //   }
+  // }
 }

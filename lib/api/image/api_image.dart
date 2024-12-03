@@ -11,7 +11,7 @@ import 'package:http/http.dart' as http;
 class ApiImage {
   static Future<ImageModel?> getImage(String image) async {
     String base = API_BASE.value;
-    String url = '$base/api/v1/images/$image';
+    String url = '$base/api/v1/images/image';
     String? token = await SessionAccess.instance.getSessionToken();
 
     var headers = {
@@ -21,7 +21,11 @@ class ApiImage {
     };
 
     try {
-      var response = await http.get(Uri.parse(url), headers: headers);
+      var response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: {'path': image},
+      );
 
       //
       if (response.statusCode == 200 || response.statusCode == 201) {

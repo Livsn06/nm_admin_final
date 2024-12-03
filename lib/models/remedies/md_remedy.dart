@@ -28,11 +28,11 @@ class RemedyModel {
   UserModel? update_by;
   UserModel? create_by;
   String? cover;
-  List<RemedyTreatmentModel>? treatments;
-  List<UsageModel>? usages;
-  List<StepModel>? steps;
-  List<IngredientModel>? ingredients;
-  List<RemedyImageModel>? images;
+  List<String>? treatments;
+  List<String>? usages;
+  List<String>? steps;
+  List<String>? ingredients;
+  List<String>? images;
 
   RemedyModel({
     this.id,
@@ -77,19 +77,10 @@ class RemedyModel {
     treatments = json['treatments'] != null
         ? RemedyTreatmentModel.fromJsonList(json['treatments'] ?? [])
         : null;
-    usages = json['usages'] != null
-        ? UsageModel.fromJsonList(json['usages'] ?? [])
-        : null;
-    steps = json['steps'] != null
-        ? StepModel.fromJsonList(json['steps'] ?? [])
-        : null;
-    ingredients = json['ingredients'] != null
-        ? IngredientModel.fromJsonList(json['ingredients'] ?? [])
-        : null;
-    cover = json['cover'];
-    images = json['images'] != null
-        ? RemedyImageModel.listFromJson(json['images'])
-        : null;
+    usages = json['usages'];
+    steps = json['steps'];
+    ingredients = json['ingredients'];
+    images = json['images']?.toList() ?? [];
   }
 
   RemedyModel.fromJsonWithPlant(Map<String, dynamic> json) {

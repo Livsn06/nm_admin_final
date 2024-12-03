@@ -53,10 +53,10 @@ mixin DataSourceApi {
     isLoading.value = true;
     var response = await ApiPlant.fetchAllPlants();
 
-    if (response.success && response.dataList != null) {
+    if (response != null) {
       isLoading.value = false;
       isError.value = false;
-      return PlantModel.listFromJson(response.dataList!);
+      return response;
     } else {
       isLoading.value = false;
       isError.value = true;

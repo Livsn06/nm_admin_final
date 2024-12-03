@@ -133,7 +133,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           const Gap(18),
           Center(
             child: Text(
-              '${user.firstname} ${user.lastname}',
+              '${user.name}',
               style: const TextStyle(
                 color: Colors.black,
                 fontSize: 20,
@@ -144,7 +144,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           const Gap(4),
           Center(
             child: Text(
-              '${user.type}',
+              '${user.role}',
               style: const TextStyle(
                 color: Colors.black,
                 fontSize: 13,
@@ -182,10 +182,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             ),
           ),
           const Gap(10),
-          Center(
+          const Center(
             child: Text(
-              '${user.total_create ?? 0} total plant created',
-              style: const TextStyle(
+              '${0} total plant created',
+              style: TextStyle(
                 color: Color.fromARGB(87, 0, 158, 32),
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
@@ -193,10 +193,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             ),
           ),
           const Gap(6),
-          Center(
+          const Center(
             child: Text(
-              '${user.total_update ?? 0} total plant updated',
-              style: const TextStyle(
+              '${0} total plant updated',
+              style: TextStyle(
                 color: Color.fromRGBO(149, 114, 0, 0.523),
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
@@ -204,10 +204,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             ),
           ),
           const Gap(6),
-          Center(
+          const Center(
             child: Text(
-              '${user.total_delete ?? 0} total plant  deleted',
-              style: const TextStyle(
+              '${0} total plant  deleted',
+              style: TextStyle(
                 color: Color(0x6FFF0303),
                 fontSize: 12,
                 fontWeight: FontWeight.w700,

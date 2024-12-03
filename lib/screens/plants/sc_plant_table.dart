@@ -183,9 +183,9 @@ class _PlantTableScreenState extends State<PlantTableScreen> {
                   leading: SizedBox(
                     width: 60,
                     height: 60,
-                    child: plant.cover == null
+                    child: plant.images!.isEmpty
                         ? Image.asset('assets/placeholder/plant_image1.jpg')
-                        : _loadingImage(plant.cover!),
+                        : _loadingImage(plant.images![0]),
                   ),
                   title: Text(
                     '${plant.name}',

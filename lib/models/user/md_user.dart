@@ -1,95 +1,98 @@
 import 'package:get/get.dart';
 
-// 'name',
-// 'email',
-// 'password',
-// 'type',
-// 'status',
-// 'avatar',
-// 'total_update',
-// 'total_delete',
-// 'total_create',
+// "message": "Login successful",
+//   "access_token": "1|yhRpWjpixotHVVD3NOa7Tqyiq1dPpvYF3nhRwk2W6c00f696",
+//   "data": {
+//       "id": 1,
+//       "name": "Joel Gutlay",
+//       "email": "jo@email.com",
+//       "email_verified_at": null,
+//       "role": "admin",
+//       "status": "active",
+//       "avatar": null,
+//       "phone": null,
+//       "address": null,
+//       "created_at": "2024-12-03T05:34:23.000000Z",
+//       "updated_at": "2024-12-03T05:34:23.000000Z"
+//   }
 class UserModel {
   int? id;
-  String? firstname;
-  String? lastname;
+  String? name;
   String? email;
   String? password;
   String? confirm_password;
-  String? type;
+  String? role;
   String? avatar;
   String? status;
-  int? total_update;
-  int? total_delete;
-  int? total_create;
+  String? phone;
+  String? address;
   String? email_verified_at;
   String? updated_at;
   String? created_at;
+  String? access_token;
 
   UserModel({
     this.id,
-    this.firstname,
-    this.lastname,
+    this.name,
     this.email,
     this.password,
     this.confirm_password,
-    this.type = 'Admin',
+    this.role = 'Admin',
     this.avatar,
     this.status,
-    this.total_update,
-    this.total_delete,
-    this.total_create,
+    this.phone,
+    this.address,
     this.email_verified_at,
     this.updated_at,
     this.created_at,
+    this.access_token,
   });
 
   static List<UserModel> listFromJson(List<dynamic> json) {
     return json.map((e) => UserModel.fromJson(e)).toList();
   }
 
-  UserModel.fromJson(Map<String, dynamic> json) {
-    id = _toInt(json['id']);
-    firstname = _splitName(_toString(json['name']), ',', 0);
-    lastname = _splitName(_toString(json['name']), ',', 1);
-
-    email = _toString(json['email']);
-    type = _toString(json['type']);
-    avatar = _toString(json['avatar']);
-    status = _toString(json['status']);
-    total_delete = _toInt(json['total_delete']);
-    total_update = _toInt(json['total_update']);
-    total_create = _toInt(json['total_create']);
-
-    // email_verified_at = json['email_verified_at'];
-    created_at = _toString(json['created_at']);
-    updated_at = _toString(json['updated_at']);
+  static UserModel fromJson(Map<String, dynamic> json, {String? accessToken}) {
+    return UserModel(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      email: json['email'] ?? '',
+      role: json['role'] ?? '',
+      avatar: json['avatar'] ?? '',
+      status: json['status'] ?? '',
+      phone: json['phone'] ?? '',
+      address: json['address'] ?? '',
+      created_at: json['created_at'] ?? '',
+      updated_at: json['updated_at'] ?? '',
+      email_verified_at: json['email_verified_at'] ?? '',
+      access_token: accessToken ?? '',
+    );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': _arrangeName(firstname!, lastname!),
+      'name': name,
       'email': _arrangeEmail(email!),
-      'type': type,
+      'type': role,
       'avatar': avatar,
       'status': status,
-      'total_update': total_update,
-      'total_delete': total_delete,
-      'total_create': total_create,
+      'phone': phone,
+      'address': address,
       'created_at': created_at,
-      'updated_at': updated_at
-      // 'email_verified_at': email_verified_at,
+      'updated_at': updated_at,
+      'email_verified_at': email_verified_at,
     };
   }
 
   Map<String, dynamic> registerToJson() {
     return {
-      'name': _arrangeName(firstname!, lastname!),
+      'name': name,
       'email': _arrangeEmail(email!),
       'password': password,
       'password_confirmation': confirm_password,
-      'type': type
+      'role': 'admin',
+      'status': 'inactive',
     };
   }
 
@@ -102,7 +105,7 @@ class UserModel {
 
   Map<String, dynamic> updateToJson() {
     return {
-      'name': _arrangeName(firstname!, lastname!),
+      'name': name,
       'password': password,
       'password_confirmation': confirm_password,
     };
@@ -128,14 +131,6 @@ class UserModel {
     };
   }
 
-  Map<String, dynamic> updateWorkStatusToJson() {
-    return {
-      'total_update': total_update,
-      'total_delete': total_delete,
-      'total_create': total_create,
-    };
-  }
-
 //
 //===========================
   bool isNull(value) {
@@ -148,14 +143,6 @@ class UserModel {
 
   _toString(value) {
     return isNull(value) ? null : value.toString();
-  }
-
-  _splitName(value, split, index) {
-    return isNull(value) ? null : value.toString().split(split)[index].trim();
-  }
-
-  _arrangeName(String firstName, String lastName) {
-    return '${_capitalizeBySpace(firstName)},${_capitalizeBySpace(lastName)}';
   }
 
   _arrangeEmail(String email) {

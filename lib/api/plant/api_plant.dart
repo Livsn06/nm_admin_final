@@ -6,20 +6,37 @@ import 'package:admin/models/plant/md_plant_local_name.dart';
 import 'package:admin/models/plant/md_plant_treatment.dart';
 import 'package:admin/models/response/md_response.dart';
 import 'package:admin/sessions/sn_access.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:html' as html;
 
 import '../../global/gb_variables.dart';
 
+// "message": "Plant fetch successfully",
+//     "data": [
+//         {
+//             "id": 5,
+//             "name": "Aloe vera",
+//             "scientific_name": "Aloe barbadensis miller",
+//             "local_name": "[\"Sabila\"]",
+//             "description": "Aloe vera, often called the \"plant of immortality,\" is a succulent plant known for its thick, fleshy leaves filled with a gel-like substance. Native to arid regions, it thrives in warm climates and has been used for centuries in traditional medicine, skincare, and wellness practices.",
+//             "status": "inactive",
+//             "image_path": "[\"plant_image\\/1733209455_Aloe vera1.jpg\",\"plant_image\\/1733209456_Aloe vera2.jpg\",\"plant_image\\/1733209456_Aloe vera3.jpg\",\"plant_image\\/1733209456_Aloe vera4.jpg\"]",
+//             "uploader_id": null,
+//             "created_at": "2024-12-03T07:04:16.000000Z",
+//             "updated_at": "2024-12-03T07:04:16.000000Z"
+//         }
+//     ]
 class ApiPlant {
   //
-  static Future<ResponseModel> fetchAllPlants() async {
+  static Future<List<PlantModel>?> fetchAllPlants() async {
     String base = API_BASE.value;
     String url = '$base/api/v1/plants';
     String? token = await SessionAccess.instance.getSessionToken();
 
     var headers = {
       'Accept': 'application/json',
+      'Content-Type': 'application/json',
       'ngrok-skip-browser-warning': 'true',
       'Authorization': 'Bearer $token'
     };
@@ -28,25 +45,22 @@ class ApiPlant {
       var response = await http.get(Uri.parse(url), headers: headers);
 
       //
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
-
         log('Plants fetched successfully', name: 'API PLANT');
-        return ResponseModel.dataListFromJson(result, success: true);
+        // log(result['data'], name: 'API PLANT');
+        return PlantModel.listFromJson(result['data']);
       }
 
       log(response.statusCode.toString(), name: 'API PLANT ERROR');
       final result = jsonDecode(response.body);
-      return ResponseModel.errorFromJson(result, success: false);
+      return null;
 
       //
     } catch (e) {
       log(e.toString(), name: 'API PLANT CLIENT ERROR');
-      return ResponseModel.clientErrorFromJson(
-        message: 'Cannot connect to server',
-        success: false,
-      );
     }
+    return null;
   }
 
   ///
@@ -91,51 +105,57 @@ class ApiPlant {
 
   //=====================================================================================================
 
-  static Future<ResponseModel> uploadPlant({required PlantModel plant}) async {
+  static Future<PlantModel?> uploadPlant(
+      {required PlantModel plant, required List<FormImageModel> images}) async {
     String base = API_BASE.value;
     String url = '$base/api/v1/plants';
     String? token = await SessionAccess.instance.getSessionToken();
 
     try {
-      var response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Accept': 'application/json',
-          'ngrok-skip-browser-warning': 'true',
-          'Authorization': 'Bearer $token'
-        },
-        body: plant.toCreatePlantJson(),
-      );
+      var request = http.MultipartRequest('POST', Uri.parse(url));
+      request.headers.addAll({
+        'Accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
+        'Authorization': 'Bearer $token'
+      });
 
-      //
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        log('Plant created successfully', name: 'API PLANT CREATE');
+      request.fields.addAll(plant.toCreatePlantJson());
 
-        final result = jsonDecode(response.body);
-        return ResponseModel.dataFromJson(result, success: true);
+      for (var image in images) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'images[]',
+            image.bytes!,
+            filename: image.name,
+          ),
+        );
       }
 
-      // Log errors
-      log('${response.statusCode}', name: 'API ERROR PLANT CREATE');
-      final result = jsonDecode(response.body);
-      log(result['message'], name: 'API ERROR PLANT CREATE');
-      return ResponseModel.errorFromJson(result, success: false);
+      final response = await request.send();
+      final responseData = await response.stream.bytesToString();
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        log('plant uploaded successfully', name: 'API PLANT UPLOADED');
+        final result = jsonDecode(responseData);
+        return PlantModel.fromJson(result['data']);
+      }
+      log(response.statusCode.toString(), name: 'API ERROR PLANT UPLOAD');
+      final result = jsonDecode(responseData);
+      return null;
+      //
     } catch (e) {
-      log('CLIENT ERROR', name: 'API CLIENT ERROR PLANT CREATE');
-      return ResponseModel.clientErrorFromJson(
-        message: 'Cannot connect to server',
-        success: false,
-      );
+      log(': CLIENT ERROR', name: 'API PLANT UPLOAD');
+      return null;
     }
   }
 
   ////  ============================================================================================
 
-  static Future<ResponseModel> uploadTeatment(
+  static Future<PlantTreatmentModel?> uploadTeatment(
       PlantTreatmentModel treatment) async {
     //
     String base = API_BASE.value;
-    String url = '$base/api/v1/plants/treatment';
+    String url = '$base/api/v1/plants/treatments';
     String? token = await SessionAccess.instance.getSessionToken();
 
     //
@@ -147,16 +167,16 @@ class ApiPlant {
           'ngrok-skip-browser-warning': 'true',
           'Authorization': 'Bearer $token'
         },
-        body: treatment.toJson(),
+        body: treatment.toCreateJson(),
       );
 
       //
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      if (response.statusCode == 200) {
         log('Treatment uploaded successfully',
             name: 'API PLANT TREATMENT CREATE');
         final result = jsonDecode(response.body);
         print('${result['message']}');
-        return ResponseModel.dataFromJson(result, success: true);
+        return PlantTreatmentModel.fromJson(result['data']);
       }
 
       log(
@@ -165,7 +185,7 @@ class ApiPlant {
       );
       final result = jsonDecode(response.body);
       print('${result['message']}');
-      return ResponseModel.errorFromJson(result, success: false);
+      return null;
 
       //
     } catch (e) {
@@ -173,161 +193,7 @@ class ApiPlant {
         e.toString(),
         name: 'API ERROR CLIENT PLANT TREATMENT CREATE',
       );
-      return ResponseModel.clientErrorFromJson(
-        message: 'Cannot connect to server',
-        success: false,
-      );
-    }
-  }
-
-  ////  ============================================================================================
-
-  static Future<ResponseModel> uploadLocalName(
-      PlantLocalNameModel localName) async {
-    //
-    String base = API_BASE.value;
-    String url = '$base/api/v1/plants/local_name';
-    String? token = await SessionAccess.instance.getSessionToken();
-
-    //
-    try {
-      var response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Accept': 'application/json',
-          'ngrok-skip-browser-warning': 'true',
-          'Authorization': 'Bearer $token'
-        },
-        body: localName.toJson(),
-      );
-
-      //
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        log('Local name uploaded successfully',
-            name: 'API PLANT LOCAL NAME CREATE');
-        final result = jsonDecode(response.body);
-        print('${result['message']}');
-        return ResponseModel.dataFromJson(result, success: true);
-      }
-
-      log(
-        '${response.statusCode}',
-        name: 'API ERROR PLANT LOCAL NAME CREATE',
-      );
-      final result = jsonDecode(response.body);
-      print('${result['message']}');
-      return ResponseModel.errorFromJson(result, success: false);
-
-      //
-    } catch (e) {
-      log(
-        e.toString(),
-        name: 'API ERROR CLIENT PLANT LOCAL NAME CREATE',
-      );
-      return ResponseModel.clientErrorFromJson(
-        message: 'Cannot connect to server',
-        success: false,
-      );
-    }
-  }
-
-  ////  ============================================================================================
-
-  static Future<ResponseModel> uploadCover(
-      PlantModel plant, FormImageModel image) async {
-    String base = API_BASE.value;
-    String url = '$base/api/v1/plants/${plant.id}/cover';
-    String? token = await SessionAccess.instance.getSessionToken();
-
-    try {
-      var request = http.MultipartRequest('POST', Uri.parse(url));
-      request.headers.addAll({
-        'Accept': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
-        'Authorization': 'Bearer $token'
-      });
-
-      request.fields.addAll({
-        'name': plant.name!,
-      });
-      request.files.add(
-        http.MultipartFile.fromBytes(
-          'cover',
-          image.bytes!,
-          filename: image.name,
-        ),
-      );
-
-      final response = await request.send();
-      final responseData = await response.stream.bytesToString();
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        log('Cover uploaded successfully', name: 'API PLANT COVER UPLOAD');
-        final result = jsonDecode(responseData);
-        return ResponseModel.dataFromJson(result, success: true);
-      }
-      log(response.statusCode.toString(), name: 'API ERROR PLANT COVER UPLOAD');
-      final result = jsonDecode(responseData);
-      return ResponseModel.errorFromJson(result, success: false);
-      //
-    } catch (e) {
-      log(': CLIENT ERROR', name: 'API PLANT COVER UPLOAD');
-      return ResponseModel.clientErrorFromJson(
-        message: 'Cannot connect to server',
-        success: false,
-      );
-    }
-  }
-
-  ////  ============================================================================================
-
-  static Future<ResponseModel> uploadImage(
-      PlantModel plant, FormImageModel image) async {
-    String base = API_BASE.value;
-    String url = '$base/api/v1/plants/image';
-    String? token = await SessionAccess.instance.getSessionToken();
-
-    try {
-      //
-      var request = http.MultipartRequest('POST', Uri.parse(url));
-      request.headers.addAll({
-        'Accept': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
-        'Authorization': 'Bearer $token'
-      });
-
-      request.fields.addAll({
-        'name': plant.name!,
-        'plant_id': plant.id.toString(),
-      });
-
-      request.files.add(
-        http.MultipartFile.fromBytes(
-          'image',
-          image.bytes!,
-          filename: image.name,
-        ),
-      );
-
-      final response = await request.send();
-      final responseData = await response.stream.bytesToString();
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        log('Image uploaded successfully', name: 'API PLANT IMAGE UPLOAD');
-        final result = jsonDecode(responseData);
-        return ResponseModel.dataFromJson(result, success: true);
-      }
-
-      log(response.statusCode.toString(), name: 'API ERROR PLANT IMAGE UPLOAD');
-      final result = jsonDecode(responseData);
-      return ResponseModel.errorFromJson(result, success: false);
-      //
-    } catch (e) {
-      log(': CLIENT ERROR', name: 'API PLANT IMAGE UPLOAD', error: e);
-      return ResponseModel.clientErrorFromJson(
-        message: 'Cannot connect to server',
-        success: false,
-      );
+      return null;
     }
   }
 
@@ -346,7 +212,7 @@ class ApiPlant {
           'ngrok-skip-browser-warning': 'true',
           'Authorization': 'Bearer $token'
         },
-        body: plant.toUpdatePlantJson(),
+        // body: plant.toUpdatePlantJson(),
       );
 
       //
