@@ -1313,80 +1313,80 @@ mixin FormFunctionality {
   }
 
   void checkEditMode(void Function() setState) async {
-    try {
-      var remedy = await SessionRemedy.getEditRemedy();
-      if (remedy != null) {
-        isEditMode.value = true;
-        plantDropdownController.value.dropDownValue = DropDownValueModel(
-          name: remedy.plant!.name!,
-          value: remedy.plant,
-        );
+    // try {
+    //   var remedy = await SessionRemedy.getEditRemedy();
+    //   if (remedy != null) {
+    //     isEditMode.value = true;
+    //     plantDropdownController.value.dropDownValue = DropDownValueModel(
+    //       name: remedy.plant!.name!,
+    //       value: remedy.plant,
+    //     );
 
-        nameController.text = remedy.name!;
-        typeController.text = remedy.type ?? '';
-        descriptionController.text = remedy.description!;
+    //     nameController.text = remedy.name!;
+    //     typeController.text = remedy.type ?? '';
+    //     descriptionController.text = remedy.description!;
 
-        //
-        var value = await ApiImage.getImage(remedy.cover!);
-        if (value != null) {
-          coverImage.value = FormImageModel(
-            name: value.file_name,
-            bytes: value.image_data,
-          );
-        } else {
-          coverImage.value = null;
-        }
+    //     //
+    //     var value = await ApiImage.getImage(remedy.cover!);
+    //     if (value != null) {
+    //       coverImage.value = FormImageModel(
+    //         name: value.file_name,
+    //         bytes: value.image_data,
+    //       );
+    //     } else {
+    //       coverImage.value = null;
+    //     }
 
-        //
-        if (remedy.images != null) {
-          for (var i = 0; i < remedy.images!.length; i++) {
-            print(remedy.images![i].path);
-            var value = await ApiImage.getImage(remedy.images![i].path!);
-            if (value != null) {
-              otherImages.add(
-                FormImageModel(
-                  id: remedy.images![i].id,
-                  name: value.file_name,
-                  bytes: value.image_data,
-                ),
-              );
-            }
-          }
-        }
+    //     //
+    //     if (remedy.images != null) {
+    //       for (var i = 0; i < remedy.images!.length; i++) {
+    //         print(remedy.images![i].path);
+    //         var value = await ApiImage.getImage(remedy.images![i].path!);
+    //         if (value != null) {
+    //           otherImages.add(
+    //             FormImageModel(
+    //               id: remedy.images![i].id,
+    //               name: value.file_name,
+    //               bytes: value.image_data,
+    //             ),
+    //           );
+    //         }
+    //       }
+    //     }
 
-        //
+    //     //
 
-        if (remedy.treatments != null) {
-          for (var ailment in remedy.treatments!) {
-            print(ailment.name);
-            ailments.add(ailment);
-          }
-        }
+    //     if (remedy.treatments != null) {
+    //       for (var ailment in remedy.treatments!) {
+    //         print(ailment.name);
+    //         ailments.add(ailment);
+    //       }
+    //     }
 
-        //
-        if (remedy.steps != null) {
-          for (var i = 0; i < remedy.steps!.length; i++) {
-            steps.add(remedy.steps![i]);
-          }
-        }
+    //     //
+    //     if (remedy.steps != null) {
+    //       for (var i = 0; i < remedy.steps!.length; i++) {
+    //         steps.add(remedy.steps![i]);
+    //       }
+    //     }
 
-        if (remedy.ingredients != null) {
-          for (var i = 0; i < remedy.ingredients!.length; i++) {
-            ingredients.add(remedy.ingredients![i]);
-          }
-        }
+    //     if (remedy.ingredients != null) {
+    //       for (var i = 0; i < remedy.ingredients!.length; i++) {
+    //         ingredients.add(remedy.ingredients![i]);
+    //       }
+    //     }
 
-        if (remedy.usages != null) {
-          for (var i = 0; i < remedy.usages!.length; i++) {
-            usages.add(remedy.usages![i]);
-          }
-        }
-      }
+    //     if (remedy.usages != null) {
+    //       for (var i = 0; i < remedy.usages!.length; i++) {
+    //         usages.add(remedy.usages![i]);
+    //       }
+    //     }
+    //   }
 
-      //
-    } catch (e) {
-      printError(info: e.toString());
-    }
+    //   //
+    // } catch (e) {
+    //   printError(info: e.toString());
+    // }
 
     setState();
   }

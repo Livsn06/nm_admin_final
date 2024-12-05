@@ -74,9 +74,9 @@ class RemedyModel {
         ? UserModel.fromJson(json['create_by'])
         : null;
 
-    treatments = json['treatments'] != null
-        ? RemedyTreatmentModel.fromJsonList(json['treatments'] ?? [])
-        : null;
+    // treatments = json['treatments'] != null
+    //     ? RemedyTreatmentModel.fromJsonList(json['treatments'] ?? [])
+    //     : null;
     usages = json['usages'];
     steps = json['steps'];
     ingredients = json['ingredients'];
@@ -98,23 +98,23 @@ class RemedyModel {
         ? UserModel.fromJson(json['create_by'])
         : null;
 
-    treatments = json['treatments'] != null
-        ? RemedyTreatmentModel.fromJsonList(json['treatments'] ?? [])
-        : null;
-    usages = json['usages'] != null
-        ? UsageModel.fromJsonList(json['usages'] ?? [])
-        : null;
-    steps = json['steps'] != null
-        ? StepModel.fromJsonList(json['steps'] ?? [])
-        : null;
-    ingredients = json['ingredients'] != null
-        ? IngredientModel.fromJsonList(json['ingredients'] ?? [])
-        : null;
+    // treatments = json['treatments'] != null
+    //     ? RemedyTreatmentModel.fromJsonList(json['treatments'] ?? [])
+    //     : null;
+    // usages = json['usages'] != null
+    //     ? UsageModel.fromJsonList(json['usages'] ?? [])
+    //     : null;
+    // steps = json['steps'] != null
+    //     ? StepModel.fromJsonList(json['steps'] ?? [])
+    //     : null;
+    // ingredients = json['ingredients'] != null
+    //     ? IngredientModel.fromJsonList(json['ingredients'] ?? [])
+    //     : null;
     plant = json['plant'] != null ? PlantModel.fromJson(json['plant']) : null;
     cover = json['cover'];
-    images = json['images'] != null
-        ? RemedyImageModel.listFromJson(json['images'])
-        : null;
+    // images = json['images'] != null
+    //     ? RemedyImageModel.listFromJson(json['images'])
+    //     : null;
   }
   Map<String, dynamic> toCreateRemedyJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
