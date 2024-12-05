@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:admin/models/plant/md_plant.dart';
 import 'package:admin/models/remedies/md_ailment.dart';
 import 'package:admin/models/remedies/md_image.dart';
@@ -22,7 +24,7 @@ class RemedyModel {
   String? description;
   String? status;
   int? rating;
-  String? side_effect;
+  List<String>? side_effect;
   int? plant_id;
   PlantModel? plant;
   UserModel? update_by;
@@ -116,14 +118,14 @@ class RemedyModel {
     //     ? RemedyImageModel.listFromJson(json['images'])
     //     : null;
   }
-  Map<String, dynamic> toCreateRemedyJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['name'] = name;
-    data['type'] = type;
-    data['description'] = description;
-    data['status'] = 'Inactive';
-    data['plant_id'] = plant_id.toString();
-    data['create_id'] = create_by!.id.toString();
+  Map<String, String> toCreateRemedyJson() {
+    final Map<String, String> data = <String, String>{};
+    data['name'] = name.toString();
+    data['type'] = type?.toString() ?? '';
+    data['description'] = description?.toString() ?? '';
+    data['status'] = status?.toString() ?? '';
+    data['step'] = jsonEncode(steps);
+    data['side_effect'] = jsonEncode(side_effect);
     return data;
   }
 

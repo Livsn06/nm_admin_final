@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:admin/global/gb_variables.dart';
+import 'package:admin/models/remedies/md_ailment.dart';
 import 'package:admin/sessions/sn_access.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -45,4 +46,6 @@ class AilmentApi {
     }
     return null;
   }
+
+  ///===============================
 }

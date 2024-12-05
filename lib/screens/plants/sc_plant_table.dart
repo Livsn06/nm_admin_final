@@ -196,7 +196,7 @@ class _PlantTableScreenState extends State<PlantTableScreen> {
                     child: _buildStatusContainer('${plant.status}'),
                     onTap: () async {
                       var status = plant.status;
-                      status = status == 'Active' ? 'Inactive' : 'Active';
+                      status = status == 'active' ? 'inactive' : 'Active';
                       var isUpdate = await widget.changeStatusModal(status);
                       if (isUpdate) {
                         plant.status = status;
@@ -233,9 +233,9 @@ class _PlantTableScreenState extends State<PlantTableScreen> {
 
   Widget _buildStatusContainer(String status) {
     return Container(
-      color: status == 'Active'
+      color: status == 'active'
           ? Colors.green
-          : status == 'Inactive'
+          : status == 'inactive'
               ? const Color(0xFFD3A21A)
               : Colors.grey,
       width: 80,

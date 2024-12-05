@@ -10,18 +10,15 @@
 
 class RemedyTreatmentModel {
   int? id;
-  String? name;
-  String? description;
   int? remedy_id;
-  int? plant_id;
+  int? treatment_id;
   String? created_at;
   String? updated_at;
 
   RemedyTreatmentModel({
     this.id,
-    this.name,
-    this.description,
     this.remedy_id,
+    this.treatment_id,
     this.created_at,
     this.updated_at,
   });
@@ -33,18 +30,16 @@ class RemedyTreatmentModel {
 
   RemedyTreatmentModel.fromJson(Map<String, dynamic> json) {
     id = int.tryParse(json['id'].toString());
-    name = json['name'];
-    description = json['description'];
     remedy_id = int.tryParse(json['remedy_id'].toString());
+    treatment_id = int.tryParse(json['treatment_id'].toString());
     created_at = json['created_at'];
     updated_at = json['updated_at'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['name'] = name.toString();
-    data['description'] = description.toString();
     data['remedy_id'] = remedy_id.toString();
+    data['treatment_id'] = treatment_id.toString();
     return data;
   }
 }

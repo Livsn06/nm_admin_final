@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:admin/models/ingredient/md_ingredient.dart';
 import 'package:admin/models/remedies/md_ailment.dart';
 import 'package:admin/models/remedies/md_ingredient.dart';
 import 'package:admin/models/remedies/md_remedy.dart';
@@ -11,6 +12,7 @@ import 'package:http/http.dart' as http;
 import 'dart:html' as html;
 import '../../global/gb_variables.dart';
 import '../../models/form/md_form_image.dart';
+import '../../models/remedies/md_remedy_plant.dart';
 
 class ApiRemedy {
   //
@@ -92,102 +94,11 @@ class ApiRemedy {
 
   //=====================================================================================================
 
-  static Future<ResponseModel> uploadRemedy(
-      {required RemedyModel remedy}) async {
+  static Future<RemedyModel?> uploadRemedy(
+      {required RemedyModel remedy,
+      required List<FormImageModel> images}) async {
     String base = API_BASE.value;
     String url = '$base/api/v1/remedies';
-    String? token = await SessionAccess.instance.getSessionToken();
-
-    try {
-      var response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Accept': 'application/json',
-          'ngrok-skip-browser-warning': 'true',
-          'Authorization': 'Bearer $token'
-        },
-        body: remedy.toCreateRemedyJson(),
-      );
-
-      //
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        log('remedy created successfully', name: 'API REMEDY CREATE');
-
-        final result = jsonDecode(response.body);
-        return ResponseModel.dataFromJson(result, success: true);
-      }
-
-      // Log errors
-      log('${response.statusCode}', name: 'API ERROR REMEDY CREATE');
-      final result = jsonDecode(response.body);
-      log(result['message'], name: 'API ERROR REMEDY CREATE');
-      return ResponseModel.errorFromJson(result, success: false);
-    } catch (e) {
-      log('CLIENT ERROR', name: 'API CLIENT ERROR REMEDY CREATE');
-      return ResponseModel.clientErrorFromJson(
-        message: 'Cannot connect to server',
-        success: false,
-      );
-    }
-  }
-
-  ////  ============================================================================================
-
-  static Future<ResponseModel> uploadTeatment(
-      {required RemedyTreatmentModel treatment}) async {
-    //
-    String base = API_BASE.value;
-    String url = '$base/api/v1/remedies/treatment';
-    String? token = await SessionAccess.instance.getSessionToken();
-
-    //
-    try {
-      var response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Accept': 'application/json',
-          'ngrok-skip-browser-warning': 'true',
-          'Authorization': 'Bearer $token'
-        },
-        body: treatment.toJson(),
-      );
-
-      //
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        log('Treatment uploaded successfully',
-            name: 'API REMEDY TREATMENT CREATE');
-        final result = jsonDecode(response.body);
-        print('${result['message']}');
-        return ResponseModel.dataFromJson(result, success: true);
-      }
-
-      log(
-        '${response.statusCode}',
-        name: 'API ERROR REMEDY TREATMENT CREATE',
-      );
-      final result = jsonDecode(response.body);
-      print('${result['message']}');
-      return ResponseModel.errorFromJson(result, success: false);
-
-      //
-    } catch (e) {
-      log(
-        e.toString(),
-        name: 'API ERROR CLIENT REMEDY TREATMENT CREATE',
-      );
-      return ResponseModel.clientErrorFromJson(
-        message: 'Cannot connect to server',
-        success: false,
-      );
-    }
-  }
-
-  ////  ============================================================================================
-
-  static Future<ResponseModel> uploadCover(
-      RemedyModel remedy, FormImageModel image) async {
-    String base = API_BASE.value;
-    String url = '$base/api/v1/remedies/${remedy.id}/cover';
     String? token = await SessionAccess.instance.getSessionToken();
 
     try {
@@ -198,40 +109,106 @@ class ApiRemedy {
         'Authorization': 'Bearer $token'
       });
 
-      request.fields.addAll({
-        'name': remedy.name!,
-      });
-      request.files.add(
-        http.MultipartFile.fromBytes(
-          'cover',
-          image.bytes!,
-          filename: image.name,
-        ),
-      );
+      request.fields.addAll(remedy.toCreateRemedyJson());
+
+      for (var image in images) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'images[]',
+            image.bytes!,
+            filename: image.name,
+          ),
+        );
+      }
 
       final response = await request.send();
       final responseData = await response.stream.bytesToString();
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        log('Cover uploaded successfully', name: 'API REMEDY COVER UPLOAD');
+        log('plant uploaded successfully', name: 'API PLANT UPLOADED');
         final result = jsonDecode(responseData);
-        return ResponseModel.dataFromJson(result, success: true);
+        return RemedyModel.fromJson(result);
       }
-      log(response.statusCode.toString(),
-          name: 'API ERROR REMEDY COVER UPLOAD');
-
+      log(response.statusCode.toString(), name: 'API ERROR PLANT UPLOAD');
       final result = jsonDecode(responseData);
-      return ResponseModel.errorFromJson(result, success: false);
+      return null;
       //
     } catch (e) {
-      log(': CLIENT ERROR', name: 'API REMEDY COVER UPLOAD');
-      return ResponseModel.clientErrorFromJson(
-        message: 'Cannot connect to server',
-        success: false,
-      );
+      log(': CLIENT ERROR', name: 'API PLANT UPLOAD');
+      return null;
     }
   }
 
+  ////  ============================================================================================
+
+  static Future<RemedyTreatmentModel?> uploadRemedyTreatment(
+      {required RemedyTreatmentModel ailment}) async {
+    String base = API_BASE.value;
+    String url = '$base/api/v1/remedies/treatments';
+    String? token = await SessionAccess.instance.getSessionToken();
+
+    try {
+      var response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+          'Authorization': 'Bearer $token'
+        },
+        body: ailment.toJson(),
+      );
+
+      //
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        log('Usage uploaded successfully', name: 'API REMEDY USAGE UPLOAD');
+        final result = jsonDecode(response.body);
+        return RemedyTreatmentModel.fromJson(result['data']);
+      }
+
+      log('${response.statusCode}', name: 'API ERROR REMEDY USAGE UPLOAD');
+      final result = jsonDecode(response.body);
+      return null;
+    } catch (e) {
+      log(': CLIENT ERROR', name: 'API REMEDY USAGE UPLOAD', error: e);
+      return null;
+    }
+  }
+
+  ////  ============================================================================================
+
+  static Future<RemedyTreatmentModel?> tagRemedyToPlant(
+      {required RemedyPlantModel tag}) async {
+    String base = API_BASE.value;
+    String url = '$base/api/v1/remedies/plantTags';
+    String? token = await SessionAccess.instance.getSessionToken();
+
+    try {
+      var response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+          'Authorization': 'Bearer $token'
+        },
+        body: tag.toJson(),
+      );
+
+      //
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        log('PLANT TAG uploaded successfully',
+            name: 'API REMEDY PLANT TAG UPLOAD');
+        final result = jsonDecode(response.body);
+        return RemedyTreatmentModel.fromJson(result['data']);
+      }
+
+      log('${response.statusCode}', name: 'API ERROR REMEDY PLANT TAG UPLOAD');
+      final result = jsonDecode(response.body);
+      return null;
+    } catch (e) {
+      log(': CLIENT ERROR', name: 'API REMEDY PLANT TAG UPLOAD', error: e);
+      return null;
+    }
+  }
   ////  ============================================================================================
 
   static Future<ResponseModel> uploadImage(
@@ -325,10 +302,10 @@ class ApiRemedy {
 
   ////  ============================================================================================
 
-  static Future<ResponseModel> uploadIngredient(
-      {required IngredientModel ingredient}) async {
+  static Future<RemedyIngredientModel?> uploadRemedyIngredient(
+      {required RemedyIngredientModel ingredient}) async {
     String base = API_BASE.value;
-    String url = '$base/api/v1/remedies/ingredient';
+    String url = '$base/api/v1/remedies/ingredients';
     String? token = await SessionAccess.instance.getSessionToken();
 
     try {
@@ -345,23 +322,20 @@ class ApiRemedy {
       //
       if (response.statusCode == 200 || response.statusCode == 201) {
         log('Ingredient uploaded successfully',
-            name: 'API REMEDY INGREDIENT UPLOAD');
+            name: 'API   INGREDIENT UPLOAD');
         final result = jsonDecode(response.body);
-        return ResponseModel.dataFromJson(result, success: true);
+        return RemedyIngredientModel.fromJson(result['data']);
       }
 
-      log('${response.statusCode}', name: 'API ERROR REMEDY INGREDIENT UPLOAD');
+      log('${response.statusCode}', name: 'API ERROR TAG INGREDIENT UPLOAD');
       final result = jsonDecode(response.body);
-      return ResponseModel.errorFromJson(result, success: false);
+      return null;
 
       //
     } catch (e) {
-      log(': CLIENT ERROR', name: 'API REMEDY INGREDIENT UPLOAD', error: e);
-      return ResponseModel.clientErrorFromJson(
-        message: 'Cannot connect to server',
-        success: false,
-      );
+      log(': CLIENT ERROR', name: 'API  INGREDIENT UPLOAD', error: e);
     }
+    return null;
   }
 
   ////==================================================================================================================================

@@ -215,7 +215,7 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             customDropDown(
-              controller: widget.ailmentController.value,
+              controller: widget.ailmentDropdownController.value,
               dataValue: ailmentController.data.value,
               hintText: 'Select Ailment',
             ),
@@ -318,19 +318,21 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
                 title: 'Add Ailment',
                 onAdd: () {
                   _buildModalAddAilment(
-                    'Add Ailment',
+                    'Select Ailment',
                     onCancel: () {
                       Get.back();
                     },
                     onAdd: () {
-                      if (widget.ailmentController.value.dropDownValue !=
+                      if (widget
+                              .ailmentDropdownController.value.dropDownValue !=
                           null) {
-                        var value = widget
-                            .ailmentController.value.dropDownValue!.value!;
+                        var value = widget.ailmentDropdownController.value
+                            .dropDownValue!.value!;
                         setState(() {
                           widget.ailments.add(value);
 
-                          widget.ailmentController.value.dropDownValue = null;
+                          widget.ailmentDropdownController.value.dropDownValue =
+                              null;
                           Get.snackbar(
                             'Added',
                             '${value.name} added successfully.',
@@ -776,7 +778,7 @@ mixin FormFuntionality {
   final modalTitleController = TextEditingController();
   final modalDescriptionController = TextEditingController();
   final modalLocalNameController = TextEditingController();
-  Rx<SingleValueDropDownController> ailmentController =
+  Rx<SingleValueDropDownController> ailmentDropdownController =
       Rx<SingleValueDropDownController>(SingleValueDropDownController());
 
   //
