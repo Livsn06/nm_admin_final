@@ -2044,6 +2044,7 @@ mixin FormFunctionality {
         type: typeController.text,
         description: descriptionController.text,
         steps: steps,
+        usage_remedy: usages,
         side_effect: side_effects,
         status: 'active',
       );
@@ -2066,15 +2067,18 @@ mixin FormFunctionality {
       progressMessage.value = 'Uploading ingredients...';
 
       for (var ingredient in ingredients) {
-        print("${ingredient.name}: ${ingredient.id}");
         IngredientModel? ingredientMain;
-        if (ingredient.id == 0 || ingredient.id == null) {
+
+        if (ingredient.id == 0) {
           ingredientMain = await IngredientApi.uploadIngredient(
             ingredient: IngredientModel(name: ingredient.name),
           );
         }
 
-        if (ingredientMain == null) {
+        print(
+            "${ingredient.name}: ${ingredient.id == 0 ? ingredientMain!.id : ingredient.id}");
+
+        if (ingredientMain == null && ingredient.id == 0) {
           Get.close(1);
           failedModal(
             title: 'Failed',
@@ -2084,21 +2088,15 @@ mixin FormFunctionality {
         }
 
         var tagIngredient = RemedyIngredientModel(
-          remedy_id: responseRemedy.id,
-          ingredient_id: 2,
+          remedy_id: int.parse(responseRemedy.id.toString()),
+          ingredient_id: int.parse(ingredient.id.toString()) == 0
+              ? int.parse(ingredientMain!.id.toString())
+              : int.parse(ingredient.id.toString()),
           description: ingredient.description,
         );
 
         var response3 =
             await ApiRemedy.uploadRemedyIngredient(ingredient: tagIngredient);
-        if (response3 == null) {
-          Get.close(1);
-          failedModal(
-            title: 'Failed',
-            subtitle: 'Failed to create tagged ingredient',
-          );
-          return;
-        }
 
         print('Ingredient uploaded successfully');
       }
@@ -2113,7 +2111,7 @@ mixin FormFunctionality {
           ),
         );
 
-        if (response4 != null) {
+        if (response4 == null) {
           Get.close(1);
           failedModal(
             title: 'Failed',
@@ -2134,7 +2132,7 @@ mixin FormFunctionality {
           plant_id: plant.id,
         ));
 
-        if (response5 != null) {
+        if (response5 == null) {
           Get.close(1);
           failedModal(
             title: 'Failed',

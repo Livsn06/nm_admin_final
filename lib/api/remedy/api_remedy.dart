@@ -127,7 +127,7 @@ class ApiRemedy {
       if (response.statusCode == 200 || response.statusCode == 201) {
         log('plant uploaded successfully', name: 'API PLANT UPLOADED');
         final result = jsonDecode(responseData);
-        return RemedyModel.fromJson(result);
+        return RemedyModel.fromJson(result['data']);
       }
       log(response.statusCode.toString(), name: 'API ERROR PLANT UPLOAD');
       final result = jsonDecode(responseData);
@@ -322,13 +322,13 @@ class ApiRemedy {
       //
       if (response.statusCode == 200 || response.statusCode == 201) {
         log('Ingredient uploaded successfully',
-            name: 'API   INGREDIENT UPLOAD');
+            name: 'API TAG   INGREDIENT UPLOAD');
         final result = jsonDecode(response.body);
         return RemedyIngredientModel.fromJson(result['data']);
       }
 
       log('${response.statusCode}', name: 'API ERROR TAG INGREDIENT UPLOAD');
-      final result = jsonDecode(response.body);
+
       return null;
 
       //
@@ -430,7 +430,7 @@ class ApiRemedy {
           'ngrok-skip-browser-warning': 'true',
           'Authorization': 'Bearer $token'
         },
-        body: remedy.toUpdateRemedyJson(),
+        // body: remedy.toUpdateRemedyJson(),
       );
 
       //

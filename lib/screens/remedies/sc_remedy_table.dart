@@ -176,15 +176,15 @@ class RemedyTableScreen extends StatelessWidget {
                   leading: SizedBox(
                     width: 60,
                     height: 60,
-                    child: remedy.cover == null
+                    child: remedy.images == null || remedy.images!.isEmpty
                         ? Image.asset('assets/placeholder/plant_image1.jpg')
-                        : _loadingImage(remedy.cover!),
+                        : _loadingImage(remedy.images!.first),
                   ),
                   title: Text(
                     '${remedy.name}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: _ratingCounter(remedy.rating),
+                  subtitle: _buiildType(remedy.type ?? 'Unknown'),
                   trailing: _buildStatusContainer('${remedy.status}'),
                 ),
               );
@@ -193,19 +193,19 @@ class RemedyTableScreen extends StatelessWidget {
     );
   }
 
-  Widget _ratingCounter(rate) {
-    List<Widget> rating = [];
-    for (int i = 0; i < 5; i++) {
-      if (i < rate) {
-        rating.add(Icon(Icons.star, color: Colors.yellow.shade700, size: 15));
-      } else {
-        rating.add(Icon(Icons.star, color: Colors.grey.shade400, size: 15));
-      }
-    }
-    return Row(
-      children: rating,
-    );
-  }
+  // Widget _ratingCounter(rate) {
+  //   List<Widget> rating = [];
+  //   for (int i = 0; i < 5; i++) {
+  //     if (i < rate) {
+  //       rating.add(Icon(Icons.star, color: Colors.yellow.shade700, size: 15));
+  //     } else {
+  //       rating.add(Icon(Icons.star, color: Colors.grey.shade400, size: 15));
+  //     }
+  //   }
+  //   return Row(
+  //     children: rating,
+  //   );
+  // }
 
   Widget _loadingImage(path) {
     return FutureBuilder(
@@ -225,11 +225,15 @@ class RemedyTableScreen extends StatelessWidget {
     );
   }
 
+  Widget _buiildType(String data) {
+    return Text(data);
+  }
+
   Widget _buildStatusContainer(String status) {
     return Container(
-      color: status == 'Active'
+      color: status == 'active'
           ? Colors.green
-          : status == 'In Active'
+          : status == 'inactive'
               ? const Color(0xFFD3A21A)
               : Colors.grey,
       width: 80,

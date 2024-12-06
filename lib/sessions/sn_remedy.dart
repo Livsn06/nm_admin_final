@@ -33,7 +33,7 @@ class SessionRemedy {
         return null;
       }
 
-      var remedy = RemedyModel.fromJsonWithPlant(response.data!);
+      var remedy = RemedyModel.fromJson(response.data!);
       print('Remedy id:${remedy.id}');
       return remedy;
     }

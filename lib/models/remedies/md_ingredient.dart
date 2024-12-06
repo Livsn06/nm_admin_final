@@ -35,6 +35,9 @@ class RemedyIngredientModel {
   }
 
   Map<String, dynamic> toJson() {
+    print(
+        'remedy_id: $remedy_id, ingredient_id: $ingredient_id, description: $description');
+
     final Map<String, dynamic> data = <String, dynamic>{};
     data['remedy_id'] = remedy_id.toString();
     data['ingredient_id'] = ingredient_id.toString();

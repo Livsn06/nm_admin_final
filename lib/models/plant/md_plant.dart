@@ -33,6 +33,7 @@ class PlantModel {
   int? like;
   String? status;
   String? local_name;
+  List<PlantTreatmentModel>? treatments;
   List<dynamic>? images;
 
   // admins
@@ -70,6 +71,14 @@ class PlantModel {
     images = json['image_path'] != null
         ? jsonDecode(json['image_path']).toList()
         : [];
+
+    treatments = json['treatments'] != null
+        ? PlantTreatmentModel.fromJsonList(json['treatments'])
+        : [];
+
+    uploader_id = json['uploader_id'] ?? 0;
+    created_at = json['created_at'] ?? 'None';
+    updated_at = json['updated_at'] ?? 'None';
   }
 
   Map<String, String> toJson() {
@@ -92,15 +101,6 @@ class PlantModel {
     data['uploader_id'] = uploader_id!.toString();
     return data;
   }
-
-  // Map<String, dynamic> toUpdatePlantJson() {
-  //   final Map<String, dynamic> data = <String, dynamic>{};
-  //   data['name'] = name.toString();
-  //   data['description'] = description.toString();
-  //   data['create_id'] = create_by!.id.toString();
-  //   data['update_id'] = update_by!.id.toString();
-  //   return data;
-  // }
 
   Map<String, dynamic> toUpdatePlantStatusJson() {
     final Map<String, dynamic> data = <String, dynamic>{};

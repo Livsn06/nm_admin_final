@@ -1263,8 +1263,8 @@ mixin FormFuntionality {
     for (var ailment in ailments) {
       //
       var configAilment = PlantTreatmentModel(
-        plant: response,
-        ailment: ailment,
+        plant_id: int.tryParse(response.id.toString()) ?? 0,
+        treatment_id: ailment.id,
       );
 
       var response2 = await ApiPlant.uploadTeatment(configAilment);
