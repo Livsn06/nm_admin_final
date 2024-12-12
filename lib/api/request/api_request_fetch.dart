@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 class ApiRequest {
   static Future<List<RequestPlantModel>?> fetchAllRequests() async {
     String base = API_BASE.value;
-    String url = '$base/api/v2/requests';
+    String url = '$base/api/v1/plantsAdditions';
 
     String? token = await SessionAccess.instance.getSessionToken();
     var headers = {

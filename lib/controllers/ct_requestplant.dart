@@ -1,4 +1,5 @@
 import 'package:admin/api/request/api_request_fetch.dart';
+import 'package:admin/controllers/const.dart';
 import 'package:admin/models/request/md_request_plant.dart';
 import 'package:get/get.dart';
 
@@ -10,22 +11,17 @@ class RequestPlantController extends GetxController with DataSourceApi {
     loadAllData();
   }
 
-  RxList<RequestPlantModel> requestPlantData = RxList<RequestPlantModel>([]);
-
   //SETTERS
 
-  List<RequestPlantModel> get getPendingStatus => filterByStatus("Pending");
-
   //FUNCTIONS
-  List<RequestPlantModel> filterByStatus(String status) {
-    return requestPlantData.value
-        .where(
-            (request) => request.status!.toLowerCase() == status.toLowerCase())
-        .toList();
-  }
+  // List<RequestPlantModel> filterByStatus(String status) {
+  //   return requestPlantData.value;
+  // }
 
   void loadAllData() async {
-    requestPlantData.value = await requestApiData() ?? [];
+    var data = await ApiRequest.fetchAllRequests() ?? [];
+    REQUESTS.value = data;
+    print(REQUESTS.value.length);
   }
 }
 

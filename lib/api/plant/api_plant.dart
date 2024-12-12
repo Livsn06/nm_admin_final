@@ -105,7 +105,7 @@ class ApiPlant {
 
   //=====================================================================================================
 
-  static Future<PlantModel?> uploadPlant(
+  static Future<bool> uploadPlant(
       {required PlantModel plant, required List<FormImageModel> images}) async {
     String base = API_BASE.value;
     String url = '$base/api/v1/plants';
@@ -136,16 +136,19 @@ class ApiPlant {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         log('plant uploaded successfully', name: 'API PLANT UPLOADED');
+
+        //
         final result = jsonDecode(responseData);
-        return PlantModel.fromJson(result['data']);
+        return true;
       }
+
+      //
       log(response.statusCode.toString(), name: 'API ERROR PLANT UPLOAD');
-      final result = jsonDecode(responseData);
-      return null;
+      return false;
       //
     } catch (e) {
       log(': CLIENT ERROR', name: 'API PLANT UPLOAD');
-      return null;
+      return false;
     }
   }
 

@@ -21,6 +21,7 @@ import 'dart:html' as html;
 
 import 'package:get/get.dart';
 
+import '../../controllers/const.dart';
 import '../../models/ailments/md_ailment.dart';
 
 class PlantCreateScreen extends StatefulWidget with FormFuntionality {
@@ -36,6 +37,10 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
   @override
   void initState() {
     super.initState();
+    if (SELECTED_REQUESTS.value.id != null) {
+      widget.plantScientificNameController.text =
+          SELECTED_REQUESTS.value.scientific_name!;
+    }
     widget.checkEditMode(() {
       setState(() {});
     });
@@ -635,7 +640,8 @@ class _PlantCreateScreenState extends State<PlantCreateScreen> {
           _buildTextFieldForm(
             label: 'Scientific Name',
             controller: widget.plantScientificNameController,
-            isReadOnly: widget.isEditMode.value,
+            isReadOnly: widget.isEditMode.value ||
+                SELECTED_REQUESTS.value.scientific_name != null,
           ),
           const Gap(30),
           _buildTextFieldForm(
@@ -1158,6 +1164,7 @@ mixin FormFuntionality {
             textColor: Colors.white,
             onPressed: () {
               Get.close(1);
+              Get.close(1);
               resetForm();
             },
             child: const Text('Ok'),
@@ -1234,52 +1241,30 @@ mixin FormFuntionality {
   void submitForm() async {
     bool isSuccess = false;
 
-    var user = await SessionAccess.instance.getSessionData();
-
     // -----------------------------------------------
     var plant = PlantModel(
       name: plantNameController.text,
       description: plantDescriptionController.text,
       scientific_name: plantScientificNameController.text,
       local_name: localNames[0],
+      treatments: ailments,
       status: 'active',
-      uploader_id: user.id,
     );
 
     progressMessage.value = 'Uploading your plant...';
     loadingModal(title: 'Creating Plant');
-    var response =
+    isSuccess =
         await ApiPlant.uploadPlant(plant: plant, images: otherImages.value);
 
-    if (response == null) {
+    if (!isSuccess) {
       Get.close(1);
       failedModal(title: 'Failed', subtitle: 'Failed to create plant');
       return;
     }
 
-    print('Plant ID: ${response.id}');
-    //--------------------------------------------------------------
-    progressMessage.value = 'Uploading treatments...';
-    for (var ailment in ailments) {
-      //
-      var configAilment = PlantTreatmentModel(
-        plant_id: int.tryParse(response.id.toString()) ?? 0,
-        treatment_id: ailment.id,
-      );
-
-      var response2 = await ApiPlant.uploadTeatment(configAilment);
-
-      if (response2 == null) {
-        Get.close(1);
-        failedModal(title: 'Failed', subtitle: 'Failed to create ailment');
-        return;
-      }
-
-      print('Ailment ID: ${response2.id}');
-      Get.close(1);
-      successModal(title: 'Success', subtitle: 'Plant created successfully');
-      isSuccess = true;
-    }
+    Get.close(1);
+    successModal(title: 'Success', subtitle: 'Plant created successfully');
+    isSuccess = true;
   }
 
   // void updateForm() async {

@@ -8,14 +8,8 @@ import 'package:admin/models/ailments/md_ailment.dart';
 import 'package:admin/models/form/md_form_image.dart';
 import 'package:admin/models/ingredient/md_ingredient.dart';
 import 'package:admin/models/plant/md_plant.dart';
-import 'package:admin/models/remedies/md_ailment.dart';
-import 'package:admin/models/remedies/md_ingredient.dart';
 import 'package:admin/models/remedies/md_remedy.dart';
 import 'package:admin/models/remedies/md_remedy_plant.dart';
-import 'package:admin/models/remedies/md_step.dart';
-import 'package:admin/models/remedies/md_usage.dart';
-import 'package:admin/models/response/md_response.dart';
-import 'package:admin/models/user/md_user.dart';
 import 'package:admin/routes/rt_routers.dart';
 import 'package:admin/sessions/sn_access.dart';
 import 'package:admin/sessions/sn_remedy.dart';
@@ -27,10 +21,13 @@ import 'package:gap/gap.dart';
 import 'dart:html' as html;
 
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:stepper_counter_swipe/stepper_counter_swipe.dart';
 
 import '../../api/image/api_image.dart';
 import '../../controllers/ct_ailment.dart';
+import '../../models/remedies/md_remedy_ingredient.dart';
+import '../../models/remedies/md_remedy_treatment.dart';
 
 class RemedyCreateScreen extends StatefulWidget with FormFunctionality {
   RemedyCreateScreen({super.key});
@@ -178,7 +175,7 @@ class _RemedyCreateScreenState extends State<RemedyCreateScreen> {
                       onAdd: () {
                         print(widget.modalIdController.text);
                         widget.ingredients.add(
-                          RemedyIngredientModel(
+                          IngredientModel(
                             id: int.tryParse(widget.modalIdController.text) ??
                                 0,
                             name: widget.modalTitleController.text,
@@ -1430,7 +1427,7 @@ mixin FormFunctionality {
 
   //
 
-  final List<RemedyIngredientModel> ingredients = [];
+  final List<IngredientModel> ingredients = [];
   final List<String> usages = [''];
   final List<String> side_effects = [''];
   final List<AilmentModel> ailments = [];
@@ -2046,105 +2043,23 @@ mixin FormFunctionality {
         steps: steps,
         usage_remedy: usages,
         side_effect: side_effects,
+        tagged_plants: plantTags,
+        treatments: ailments,
+        ingredients: ingredients,
         status: 'active',
       );
 
-      var responseRemedy = await ApiRemedy.uploadRemedy(
+      var isSuccess = await ApiRemedy.uploadRemedy(
         remedy: remedy,
         images: otherImages.value,
       );
-
-      if (responseRemedy == null) {
-        Get.close(1);
-        failedModal(
-          title: 'Failed',
-          subtitle: 'Failed to create remedy',
-        );
+      Get.close(1);
+      if (!isSuccess) {
+        failedModal(title: 'Failed', subtitle: 'Remedy upload failed.');
         return;
       }
-      print('Remedy uploaded successfully');
 
-      progressMessage.value = 'Uploading ingredients...';
-
-      for (var ingredient in ingredients) {
-        IngredientModel? ingredientMain;
-
-        if (ingredient.id == 0) {
-          ingredientMain = await IngredientApi.uploadIngredient(
-            ingredient: IngredientModel(name: ingredient.name),
-          );
-        }
-
-        print(
-            "${ingredient.name}: ${ingredient.id == 0 ? ingredientMain!.id : ingredient.id}");
-
-        if (ingredientMain == null && ingredient.id == 0) {
-          Get.close(1);
-          failedModal(
-            title: 'Failed',
-            subtitle: 'Failed to create ingredient',
-          );
-          return;
-        }
-
-        var tagIngredient = RemedyIngredientModel(
-          remedy_id: int.parse(responseRemedy.id.toString()),
-          ingredient_id: int.parse(ingredient.id.toString()) == 0
-              ? int.parse(ingredientMain!.id.toString())
-              : int.parse(ingredient.id.toString()),
-          description: ingredient.description,
-        );
-
-        var response3 =
-            await ApiRemedy.uploadRemedyIngredient(ingredient: tagIngredient);
-
-        print('Ingredient uploaded successfully');
-      }
-
-      progressMessage.value = 'Uploading treatments...';
-
-      for (var treatment in ailments) {
-        var response4 = await ApiRemedy.uploadRemedyTreatment(
-          ailment: RemedyTreatmentModel(
-            remedy_id: responseRemedy.id,
-            treatment_id: treatment.id,
-          ),
-        );
-
-        if (response4 == null) {
-          Get.close(1);
-          failedModal(
-            title: 'Failed',
-            subtitle: 'Failed to create treatment',
-          );
-          return;
-        }
-
-        print('Treatment uploaded successfully');
-      }
-
-      progressMessage.value = 'Tagging remedy to plant...';
-
-      for (var plant in plantTags) {
-        var response5 = await ApiRemedy.tagRemedyToPlant(
-            tag: RemedyPlantModel(
-          remedy_id: responseRemedy.id,
-          plant_id: plant.id,
-        ));
-
-        if (response5 == null) {
-          Get.close(1);
-          failedModal(
-            title: 'Failed',
-            subtitle: 'Failed to tag remedy to plant',
-          );
-          return;
-        }
-
-        print('Tagged remedy to plant successfully');
-      }
-
-      Get.close(1);
+      //
       successModal(
         title: 'Success',
         subtitle: 'Remedy created successfully',

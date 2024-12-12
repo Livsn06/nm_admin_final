@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:admin/api/image/api_image.dart';
-import 'package:admin/controllers/ct_plant.dart';
 import 'package:admin/controllers/ct_remedy.dart';
 import 'package:admin/models/remedies/md_remedy.dart';
 import 'package:admin/routes/rt_routers.dart';
@@ -11,6 +10,7 @@ import 'package:admin/widgets/wg_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
+import 'package:image_network/image_network.dart';
 
 class RemedyTableScreen extends StatelessWidget {
   RemedyTableScreen({super.key});
@@ -176,9 +176,14 @@ class RemedyTableScreen extends StatelessWidget {
                   leading: SizedBox(
                     width: 60,
                     height: 60,
-                    child: remedy.images == null || remedy.images!.isEmpty
-                        ? Image.asset('assets/placeholder/plant_image1.jpg')
-                        : _loadingImage(remedy.images!.first),
+                    child:
+                        remedy.image_path == null || remedy.image_path!.isEmpty
+                            ? Image.asset('assets/placeholder/plant_image1.jpg')
+                            : ImageNetwork(
+                                image: Uri.encodeFull(remedy.image_path![0]),
+                                height: 50,
+                                width: 50,
+                              ),
                   ),
                   title: Text(
                     '${remedy.name}',

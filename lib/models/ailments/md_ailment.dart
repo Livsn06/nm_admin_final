@@ -16,6 +16,7 @@ class AilmentModel {
   });
 
   static List<AilmentModel> listFromJson(List<dynamic> jsonList) {
+    if (jsonList.isEmpty) return [];
     return jsonList.map((json) => AilmentModel.fromJson(json)).toList();
   }
 
@@ -27,4 +28,6 @@ class AilmentModel {
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
   }
+
+  //
 }

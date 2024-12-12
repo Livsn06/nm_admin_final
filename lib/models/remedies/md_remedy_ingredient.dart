@@ -8,6 +8,8 @@
 //                     "updated_at": "2024-10-31T10:19:00.000000Z"
 //                 },
 
+import 'package:admin/models/ingredient/md_ingredient.dart';
+
 class RemedyIngredientModel {
   int? id;
   int? ingredient_id;

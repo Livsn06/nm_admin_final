@@ -13,6 +13,8 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'dart:html' as html;
 
+import 'package:image_network/image_network.dart';
+
 class PlantTableScreen extends StatefulWidget with OtherFunctionality {
   const PlantTableScreen({super.key});
 
@@ -185,7 +187,11 @@ class _PlantTableScreenState extends State<PlantTableScreen> {
                     height: 60,
                     child: plant.images!.isEmpty
                         ? Image.asset('assets/placeholder/plant_image1.jpg')
-                        : _loadingImage(plant.images![0]),
+                        : ImageNetwork(
+                            image: Uri.encodeFull(plant.images![0]),
+                            width: 60,
+                            height: 60,
+                          ),
                   ),
                   title: Text(
                     '${plant.name}',
@@ -209,25 +215,6 @@ class _PlantTableScreenState extends State<PlantTableScreen> {
               );
             });
       }),
-    );
-  }
-
-  Widget _loadingImage(path) {
-    return FutureBuilder(
-      future: ApiImage.getImage(path),
-      builder: (context, snapshot) {
-        if (snapshot.hasError || !snapshot.hasData) {
-          return Image.asset('assets/placeholder/plant_image1.jpg');
-        }
-        if (snapshot.hasData) {
-          var data = snapshot.data;
-          return Image.memory(
-            data!.image_data!,
-          );
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
     );
   }
 

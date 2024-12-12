@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 
+import '../../controllers/const.dart';
+
 class RequestTableScreen extends StatelessWidget {
   RequestTableScreen({super.key});
   var requestPlantController = Get.put(RequestPlantController());
@@ -137,10 +139,9 @@ class RequestTableScreen extends StatelessWidget {
               mainAxisSpacing: 5,
               childAspectRatio: 30 / 2,
             ),
-            itemCount: requestPlantController.requestPlantData.value.length,
+            itemCount: REQUESTS.value.length,
             itemBuilder: (context, index) {
-              var request =
-                  requestPlantController.requestPlantData.value[index];
+              var request = REQUESTS.value[index];
 
               return Card(
                 color: Colors.white,
@@ -148,17 +149,23 @@ class RequestTableScreen extends StatelessWidget {
                   leading: Container(
                     width: 70,
                     height: 70,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       image: DecorationImage(
-                        image: MemoryImage(
-                          request.images?[0].image_data as Uint8List,
+                        image: NetworkImage(
+                          // request.images != null && request.images![0] != null
+                          //     ? request.images![0]
+                          "https://coffective.com/wp-content/uploads/2018/06/default-featured-image.png.jpg",
                         ),
                       ),
                     ),
                   ),
-                  title: Text('${request.plantName}'),
-                  subtitle: Text('${request.scientific_name}'),
-                  trailing: colorIndicator('${request.status}'),
+                  title: Text('${request.scientific_name}'),
+                  trailing: InkWell(
+                      child: colorIndicator("Accept"),
+                      onTap: () {
+                        ACCEPTED_REQUESTS.value.add(request);
+                        Get.toNamed(CustomRoute.path.workplace);
+                      }),
                 ),
               );
             },
@@ -170,18 +177,19 @@ class RequestTableScreen extends StatelessWidget {
 
   Widget colorIndicator(String status) {
     return Container(
-      width: 80,
-      height: 20,
+      width: 90,
+      height: 40,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: status == 'In Progress'
             ? const Color(0xFF9E8E00)
             : status == 'Completed'
                 ? Colors.green
-                : Colors.red,
+                : const Color.fromARGB(255, 149, 90, 0),
         borderRadius: BorderRadius.circular(50),
       ),
-      child: Text(status, style: const TextStyle(color: Colors.white)),
+      child: Text(status,
+          style: const TextStyle(color: Colors.white, fontSize: 16)),
     );
   }
 }

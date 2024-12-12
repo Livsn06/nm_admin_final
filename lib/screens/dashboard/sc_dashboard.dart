@@ -9,20 +9,23 @@ import 'package:admin/widgets/wg_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
+import 'package:image_network/image_network.dart';
 import 'dart:html' as html;
 
+import '../../controllers/const.dart';
 import '../../widgets/wg_drawer.dart';
 
 class DashboardScreen extends StatelessWidget {
   DashboardScreen({super.key});
   final plantController = Get.put(PlantController());
   final workplaceController = Get.put(WorkplaceController());
-  final requestplantController = Get.put(RequestPlantController());
+  var requestplantController = Get.put(RequestPlantController());
   final userController = Get.put(UserController());
 
   //
   @override
   Widget build(BuildContext context) {
+    requestplantController = Get.put(RequestPlantController());
     html.document.title = 'Naturemedix | Dashboard';
     return Scaffold(
       drawer: customDrawer(),
@@ -295,37 +298,43 @@ class DashboardScreen extends StatelessWidget {
               flex: 14,
               child: Container(
                 color: const Color.fromARGB(0, 0, 0, 0),
-                child: Obx(() {
-                  return ListView.builder(
-                    itemCount: requestplantController.getPendingStatus.length,
-                    itemBuilder: (context, index) {
-                      var data = requestplantController.getPendingStatus[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 0.02),
-                        child: Card(
-                          color: const Color.fromARGB(255, 255, 255, 255),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            side: const BorderSide(
-                              color: Color.fromARGB(255, 210, 210, 210),
-                            ),
-                            borderRadius: BorderRadius.circular(5),
+                child: ListView.builder(
+                  itemCount: REQUESTS.value.length,
+                  itemBuilder: (context, index) {
+                    if (REQUESTS.value.isEmpty) {
+                      return const Center(
+                          child: Text(
+                        'No Data Found',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ));
+                    }
+                    var data = REQUESTS.value[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 0.02),
+                      child: Card(
+                        color: const Color.fromARGB(255, 255, 255, 255),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          side: const BorderSide(
+                            color: Color.fromARGB(255, 210, 210, 210),
                           ),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: Colors.transparent,
-                              radius: 20,
-                              child: Image.memory(
-                                data.images?[0].image_data ?? Uint8List(0),
-                              ),
-                            ),
-                            title: Text('${data.plantName}'),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: ListTile(
+                          title: Text('${data.scientific_name}'),
+                          leading: ImageNetwork(
+                            image: data.images?[0],
+                            height: 50,
+                            width: 50,
                           ),
                         ),
-                      );
-                    },
-                  );
-                }),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ],

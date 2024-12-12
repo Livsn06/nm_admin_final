@@ -1,5 +1,4 @@
 import 'package:admin/models/ailments/md_ailment.dart';
-import 'package:admin/models/plant/md_plant.dart';
 
 // {
 //     "id": 49,

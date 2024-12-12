@@ -6,6 +6,7 @@ import 'package:gap/gap.dart';
 
 import 'package:get/get.dart';
 
+import '../../controllers/const.dart';
 import '../../controllers/ct_workplace.dart';
 
 class WorkplaceScreen extends StatelessWidget {
@@ -174,20 +175,26 @@ class TabBody extends StatelessWidget {
           crossAxisSpacing: 20,
           mainAxisSpacing: 20,
         ),
-        itemCount: filteredPlants.length + 1,
+        itemCount: ACCEPTED_REQUESTS.value.length + 1,
         itemBuilder: (context, index) {
           if (index - 1 == -1) {
             return CreateNewButton(
-              ontap: () {},
+              ontap: () {
+                Get.toNamed(CustomRoute.path.plantsCreate);
+              },
             );
           }
-          var plant = filteredPlants[index - 1];
+          var plant = ACCEPTED_REQUESTS.value[index - 1];
           return PlantCard(
-            plantname: plant.plantName!,
-            status: plant.status!,
-            date: plant.updated_at!,
-            plantimage: '${plant.images?[0]}',
-            ontap: () {},
+            plantname: plant.scientific_name!,
+            status: 'Pending',
+            date: '12/13/2024',
+            plantimage:
+                '${plant.images == null || plant.images!.isEmpty ? 'https://coffective.com/wp-content/uploads/2018/06/default-featured-image.png.jpg' : plant.images![0]}',
+            ontap: () {
+              SELECTED_REQUESTS.value = plant;
+              Get.toNamed(CustomRoute.path.plantsCreate);
+            },
           );
         },
       );
@@ -260,65 +267,71 @@ class PlantCard extends StatelessWidget {
   Function()? ontap;
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // New Tag
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: getStatusColor(status),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                status,
-                style: TextStyle(
-                  color: (status == 'Completed') ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            // Plant Image (Placeholder for now)
-            Expanded(
-              child: Container(
+    return InkWell(
+      onTap: ontap,
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // New Tag
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  image: DecorationImage(
-                    image: NetworkImage(plantimage),
-                    fit: BoxFit.cover,
+                  color: getStatusColor(status),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  status,
+                  style: TextStyle(
+                    color:
+                        (status == 'Completed') ? Colors.white : Colors.black,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 8),
-            // Plant Name
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: Text(
-                plantname,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              // Plant Image (Placeholder for now)
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    image: DecorationImage(
+                      image: NetworkImage(plantimage),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
               ),
-            ),
-            // Date
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-              child: Text(
-                date,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
+              const SizedBox(height: 8),
+              // Plant Name
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                child: Text(
+                  plantname,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
-          ],
+              // Date
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                child: Text(
+                  date,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,6 +1,9 @@
 import 'dart:convert';
 
-import 'package:admin/models/remedies/md_ailment.dart';
+import '../ailments/md_ailment.dart';
+import '../ingredient/md_ingredient.dart';
+import '../plant/md_plant.dart';
+import 'md_rating.dart';
 
 // "data": [
 //         {
@@ -40,11 +43,15 @@ class RemedyModel {
   String? type;
   String? description;
   String? status;
-  List<dynamic>? usage_remedy;
-  List<dynamic>? side_effect;
-  List<RemedyTreatmentModel>? treatments;
+  double? average_rating;
   List<dynamic>? steps;
-  List<dynamic>? images;
+  List<dynamic>? side_effect;
+  List<dynamic>? usage_remedy;
+  List<IngredientModel>? ingredients;
+  List<dynamic>? image_path;
+  List<RatingModel>? user_ratings;
+  List<AilmentModel>? treatments;
+  List<PlantModel>? tagged_plants;
   String? created_at;
   String? updated_at;
 
@@ -54,12 +61,17 @@ class RemedyModel {
     this.type,
     this.description,
     this.status,
+    this.average_rating,
+    this.ingredients,
     this.steps,
-    this.usage_remedy,
     this.side_effect,
+    this.usage_remedy,
+    this.image_path,
+    this.user_ratings,
     this.treatments,
+    this.tagged_plants,
     this.created_at,
-    this.images,
+    this.updated_at,
   });
 
   static List<RemedyModel> fromJsonList(List list) {
@@ -68,33 +80,38 @@ class RemedyModel {
   }
 
   RemedyModel.fromJson(Map<String, dynamic> json) {
-    id = int.tryParse(json['id'].toString());
-    name = json['name'] ?? '';
-    type = json['type'] ?? '';
-    description = json['description'] ?? '';
-    status = json['status'] ?? '';
-    steps = json['steps'] != null ? jsonDecode(json['step']).toList() : [];
-    usage_remedy = json['usage_remedy'] != null
-        ? jsonDecode(json['usage_remedy']).toList()
-        : [];
-    side_effect = json['side_effect'] != null
-        ? jsonDecode(json['side_effect']).toList()
-        : [];
-    images = json['image'] != null ? jsonDecode(json['image']).toList() : [];
-    treatments = json['treatments'] != null
-        ? RemedyTreatmentModel.fromJsonList(json['treatments'])
-        : [];
+    id = int.tryParse(json['id'].toString()) ?? 0;
+    name = json['name'] ?? 'Unknown';
+    type = json['type'] ?? 'Unknown';
+    description = json['description'] ?? 'None';
+    status = json['status'] ?? 'ctive';
+    average_rating = double.tryParse(json['average_rating'].toString()) ?? 0;
+    ingredients = IngredientModel.listFromJson(json['ingredients'] ?? []);
+    steps = json['step'] ?? [];
+    side_effect = json['side_effect'] ?? [];
+    usage_remedy = json['usage_remedy'] ?? [];
+    image_path = json['image_path'] ?? [];
+    user_ratings = RatingModel.listFromJson(json['user_ratings'] ?? []);
+    treatments = AilmentModel.listFromJson(json['treatments'] ?? []);
+    tagged_plants = PlantModel.listFromJson(json['tagged_plants'] ?? []);
+    created_at = json['created_at'];
+    updated_at = json['updated_at'];
   }
 
   Map<String, String> toCreateRemedyJson() {
     final Map<String, String> data = <String, String>{};
     data['name'] = name.toString();
-    data['type'] = type?.toString() ?? '';
-    data['description'] = description?.toString() ?? '';
-    data['status'] = status?.toString() ?? '';
+    data['type'] = type.toString();
+    data['description'] = description.toString();
+    data['status'] = status?.toString() ?? 'active';
     data['step'] = jsonEncode(steps);
     data['usage_remedy'] = jsonEncode(usage_remedy);
     data['side_effect'] = jsonEncode(side_effect);
+    data['ingredients'] =
+        jsonEncode(IngredientModel.listToMap(ingredients ?? []));
+    data['tagged_plants'] =
+        jsonEncode(tagged_plants!.map((e) => e.id.toString()).join(','));
+    data['treatments'] = jsonEncode(treatments!.map((e) => e.id).join(','));
     return data;
   }
 
